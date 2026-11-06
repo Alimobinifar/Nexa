@@ -8,17 +8,26 @@ namespace Domain.Entities.Products
 {
     public sealed class ProductEntry : BaseModel
     {
-        public string PersianDate { get; set; }
+        public DateTime EntryDate { get; set; } = DateTime.UtcNow;
+
         public decimal Quantity { get; set; }
+
         public decimal UnitPurchasePrice { get; set; }
+
         public decimal TotalValue => Quantity * UnitPurchasePrice;
+
         public string? Notes { get; set; }
 
-        #region NavigationProperty
-        public int? SupplierId { get; set; }
+        #region Navigation Properties
+
         public int ProductId { get; set; }
-        public Product Product { get; set; }
-        public Supplier Supplier { get; set; }
+
+        public Product Product { get; set; } = null!;
+
+        public int? SupplierId { get; set; }
+
+        public Supplier? Supplier { get; set; }
+
         #endregion
     }
 }

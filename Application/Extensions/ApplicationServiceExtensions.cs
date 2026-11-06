@@ -1,4 +1,5 @@
-﻿using Application.Interfaces.Products;
+﻿using Application.Interfaces.IWarehouseInventory;
+using Application.Interfaces.Products;
 using Application.Interfaces.SaleChannels;
 using Application.Interfaces.SalesRegistration;
 using Application.Interfaces.Suppliers;
@@ -6,6 +7,7 @@ using Application.Services.ProductServices;
 using Application.Services.SaleRegistrationServices;
 using Application.Services.SalesChannels;
 using Application.Services.SupplierServices;
+using Application.Services.WarehouseInventoryServices;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Application.Extensions
@@ -20,6 +22,7 @@ namespace Application.Extensions
             services.AddScoped<ISupplierService, SupplierService>();
             services.AddScoped<ISaleRegistrationService,SaleRegistrationService>();
             services.AddScoped<ISalesChannelService, SalesChannelService>();
+            services.AddScoped<IWarehouseInventoryService, WarehouseInventoryService>();
             return services;
         }
     }

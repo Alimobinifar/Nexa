@@ -6,13 +6,15 @@ using Domain.Entities.Products;
 
 namespace Domain.Entities.Inventories
 {
-    public class Inventory:BaseModel
+    public sealed class WarehouseInventory : BaseModel
     {
-        public int CurrentInventory {  get; set; }
-        
+        public decimal CurrentInventory { get; set; }
+
         #region NavigationProperty And Relations
+
         public int ProductId { get; set; }
-        public Domain.Entities.Products.Product Product { get; set; }
+        public Domain.Entities.Products.Product Product { get; set; } = null!;
+
         #endregion
-        }
+    }
 }

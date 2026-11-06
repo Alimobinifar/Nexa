@@ -23,7 +23,7 @@ namespace Infrastructure.DataBase
 
         public DbSet<Product> Products { get; set; }
 
-        public DbSet<Inventory> Inventories { get; set; }
+        public DbSet<WarehouseInventory> WarehouseInventory { get; set; }
 
         public DbSet<ProductCategory> ProductCategories { get; set; }
 

@@ -22,7 +22,7 @@ namespace Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Domain.Entities.Inventories.Inventory", b =>
+            modelBuilder.Entity("Domain.Entities.Inventories.WarehouseInventory", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -33,8 +33,8 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("CurrentInventory")
-                        .HasColumnType("int");
+                    b.Property<decimal>("CurrentInventory")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
@@ -49,7 +49,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("Inventories");
+                    b.ToTable("WarehouseInventory");
                 });
 
             modelBuilder.Entity("Domain.Entities.Product.ProductCategory", b =>
@@ -135,6 +135,9 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime>("EntryDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
@@ -142,10 +145,6 @@ namespace Infrastructure.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PersianDate")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("ProductId")
@@ -177,6 +176,12 @@ namespace Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("AllocatedQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ChannelId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -189,13 +194,10 @@ namespace Infrastructure.Migrations
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
-                    b.Property<int>("QuantitiesByChannel")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SaleChannelId")
-                        .HasColumnType("int");
-
                     b.Property<int>("SalesChannelId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SoldQuantity")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -215,11 +217,17 @@ namespace Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<decimal>("BuyPrice")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<int>("ChannelId")
                         .HasColumnType("int");
 
-                    b.Property<int>("CommissionRate")
-                        .HasColumnType("int");
+                    b.Property<decimal>("CommissionCost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("CommissionRate")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -230,14 +238,23 @@ namespace Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<decimal>("NetProfit")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("NetProfitPercent")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<decimal>("PackingPrice")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ProductQuaantity")
+                    b.Property<int>("ProductQuantity")
                         .HasColumnType("int");
+
+                    b.Property<decimal>("PurchaseNetCost")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("SalePrice")
                         .HasColumnType("decimal(18,2)");
@@ -246,6 +263,9 @@ namespace Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("SendPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TotalSaleAmount")
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
@@ -271,6 +291,15 @@ namespace Infrastructure.Migrations
                     b.Property<decimal>("DefaultCommissionRate")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("FixedFee")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
@@ -279,6 +308,12 @@ namespace Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SupportPhone")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("WebsiteUrl")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -559,7 +594,7 @@ namespace Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Entities.Inventories.Inventory", b =>
+            modelBuilder.Entity("Domain.Entities.Inventories.WarehouseInventory", b =>
                 {
                     b.HasOne("Domain.Entities.Products.Product", "Product")
                         .WithMany()
@@ -610,7 +645,7 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.SalesChannels.ProductChannelAllocation", b =>
                 {
                     b.HasOne("Domain.Entities.Products.Product", "Product")
-                        .WithMany()
+                        .WithMany("ChannelAllocations")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -635,7 +670,7 @@ namespace Infrastructure.Migrations
                         .IsRequired();
 
                     b.HasOne("Domain.Entities.SellingChannels.SalesChannel", "SalesChannel")
-                        .WithMany()
+                        .WithMany("SaleRegistrations")
                         .HasForeignKey("SalesChannelId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -699,6 +734,16 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.Product.ProductCategory", b =>
                 {
                     b.Navigation("SubCategories");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Products.Product", b =>
+                {
+                    b.Navigation("ChannelAllocations");
+                });
+
+            modelBuilder.Entity("Domain.Entities.SellingChannels.SalesChannel", b =>
+                {
+                    b.Navigation("SaleRegistrations");
                 });
 #pragma warning restore 612, 618
         }

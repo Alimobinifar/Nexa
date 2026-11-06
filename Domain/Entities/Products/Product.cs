@@ -1,5 +1,6 @@
 ﻿using Domain.Entities.BaseEntities;
 using Domain.Entities.Product;
+using Domain.Entities.SalesChannels;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -17,6 +18,8 @@ namespace Domain.Entities.Products
         #region NavigationProperty And Relations
         public int CategoryId { get; set; }
         public ProductCategory Category { get; set; }
+        public ICollection<ProductChannelAllocation> ChannelAllocations { get; set; }
+    = new List<ProductChannelAllocation>();
         #endregion
     }
 }
