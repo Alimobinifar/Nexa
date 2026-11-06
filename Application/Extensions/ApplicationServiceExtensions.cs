@@ -1,13 +1,12 @@
 ﻿using Application.Interfaces.Products;
+using Application.Interfaces.SaleChannels;
 using Application.Interfaces.SalesRegistration;
 using Application.Interfaces.Suppliers;
 using Application.Services.ProductServices;
 using Application.Services.SaleRegistrationServices;
+using Application.Services.SalesChannels;
 using Application.Services.SupplierServices;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Application.Extensions
 {
@@ -20,7 +19,7 @@ namespace Application.Extensions
             services.AddScoped<IProductCategoryService, ProductCategoryService>();
             services.AddScoped<ISupplierService, SupplierService>();
             services.AddScoped<ISaleRegistrationService,SaleRegistrationService>();
-
+            services.AddScoped<ISalesChannelService, SalesChannelService>();
             return services;
         }
     }

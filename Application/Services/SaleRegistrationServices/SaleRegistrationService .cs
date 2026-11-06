@@ -19,20 +19,14 @@ namespace Application.Services.SaleRegistrationServices
         private readonly IGenericRepository<SaleRegistration> _saleRepository;
         private readonly IGenericRepository<Product> _productRepository;
         private readonly IGenericRepository<SalesChannel> _channelRepository;
-        private readonly ILogger<SaleRegistrationService> _logger;
 
         public SaleRegistrationService(
-            IUnitOfWork unitOfWork,
-            IGenericRepository<SaleRegistration> saleRepository,
-            IGenericRepository<Product> productRepository,
-            IGenericRepository<SalesChannel> channelRepository,
-            ILogger<SaleRegistrationService> logger)
+            IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _saleRepository = saleRepository;
-            _productRepository = productRepository;
-            _channelRepository = channelRepository;
-            _logger = logger;
+            _saleRepository = _unitOfWork.Repository<SaleRegistration>();
+            _productRepository = _unitOfWork.Repository<Product>();
+            _channelRepository = _unitOfWork.Repository<SalesChannel>();
         }
 
         private static string? ValidateFinancialData(
@@ -145,8 +139,7 @@ namespace Application.Services.SaleRegistrationServices
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex,
-                    "Error creating sale registration.");
+
 
                 return ResponseDto<SaleRegistrationDto>.Error(
                     "در ثبت اطلاعات فروش خطایی رخ داد.", 500);
@@ -218,8 +211,7 @@ namespace Application.Services.SaleRegistrationServices
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex,
-                    "Error updating sale registration with ID {Id}", dto?.Id);
+
 
                 return ResponseDto<SaleRegistrationDto>.Error(
                     "در ویرایش اطلاعات فروش خطایی رخ داد.", 500);
@@ -248,9 +240,6 @@ namespace Application.Services.SaleRegistrationServices
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex,
-                    "Error deleting sale registration with ID {Id}", id);
-
                 return ResponseDto<bool>.Error(
                     "در حذف رکورد فروش خطایی رخ داد.", 500);
             }
@@ -272,9 +261,6 @@ namespace Application.Services.SaleRegistrationServices
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex,
-                    "Error retrieving sale registrations.");
-
                 return ResponseDto<IEnumerable<SaleRegistrationDto>>.Error(
                     "در دریافت اطلاعات فروش خطایی رخ داد.", 500);
             }
@@ -300,9 +286,6 @@ namespace Application.Services.SaleRegistrationServices
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex,
-                    "Error retrieving sale registration with ID {Id}", id);
-
                 return ResponseDto<SaleRegistrationDto>.Error(
                     "در دریافت اطلاعات فروش خطایی رخ داد.", 500);
             }
@@ -335,9 +318,6 @@ namespace Application.Services.SaleRegistrationServices
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex,
-                    "Error retrieving sales for product {ProductId}", productId);
-
                 return ResponseDto<IEnumerable<SaleRegistrationDto>>.Error(
                     "در دریافت سوابق فروش محصول خطایی رخ داد.", 500);
             }
@@ -370,9 +350,6 @@ namespace Application.Services.SaleRegistrationServices
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex,
-                    "Error retrieving sales for channel {ChannelId}", channelId);
-
                 return ResponseDto<IEnumerable<SaleRegistrationDto>>.Error(
                     "در دریافت سوابق کانال فروش خطایی رخ داد.", 500);
             }

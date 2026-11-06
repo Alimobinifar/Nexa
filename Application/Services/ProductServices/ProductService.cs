@@ -17,13 +17,11 @@ namespace Application.Services.ProductServices
         private readonly IGenericRepository<Product> _repository;
         private readonly IGenericRepository<ProductCategory> _categoryRepository;
 
-        public ProductService(IUnitOfWork unitOfWork,
-            IGenericRepository<Product> repository,
-            IGenericRepository<ProductCategory> categoryRepository)
+        public ProductService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _repository = repository;
-            _categoryRepository = categoryRepository;
+            _repository = _unitOfWork.Repository<Product>();
+            _categoryRepository = _unitOfWork.Repository<ProductCategory>();
         }
 
         public async Task<ResponseDto<CreateProductDto>> CreateProduct(CreateProductDto product)

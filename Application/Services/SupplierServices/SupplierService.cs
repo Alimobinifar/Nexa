@@ -20,12 +20,12 @@ namespace Application.Services.SupplierServices
 
         public SupplierService(
             IUnitOfWork unitOfWork,
-            IGenericRepository<Supplier> repository,
             ILogger<SupplierService> logger)
         {
             _unitOfWork = unitOfWork;
-            _repository = repository;
             _logger = logger;
+
+            _repository = _unitOfWork.Repository<Supplier>();
         }
 
         // Create Supplier
