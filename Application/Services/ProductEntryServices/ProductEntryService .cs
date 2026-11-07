@@ -1,8 +1,10 @@
 ﻿using Application.Interfaces.ProductEntries;
 using Contracts.Cmmon.Dtos.ProductEntries;
 using Contracts.Cmmon.Dtos.ResultAndResponse;
+using Domain.Entities.Inventories;
 using Domain.Entities.Products;
 using Domain.Entities.Suppliers;
+using Domain.Enums;
 using Domain.Interfaces.GenericInterfaces;
 using Domain.Interfaces.UnitOfWork;
 using Microsoft.Extensions.Logging;
@@ -18,6 +20,8 @@ namespace Application.Services.ProductEntryServices
         private readonly IGenericRepository<ProductEntry> _repository;
         private readonly IGenericRepository<Product> _productRepository;
         private readonly IGenericRepository<Supplier> _supplierRepository;
+        private readonly IGenericRepository<WarehouseInventory> _inventoryRepository;
+        private readonly IGenericRepository<InventoryTransaction> _inventoryTransactionRepository;
         private readonly ILogger<ProductEntryService> _logger;
 
         public ProductEntryService(
@@ -30,41 +34,56 @@ namespace Application.Services.ProductEntryServices
             _repository = _unitOfWork.Repository<ProductEntry>();
             _productRepository = _unitOfWork.Repository<Product>();
             _supplierRepository = _unitOfWork.Repository<Supplier>();
+            _inventoryRepository = _unitOfWork.Repository<WarehouseInventory>();
+            _inventoryTransactionRepository = _unitOfWork.Repository<InventoryTransaction>();
         }
 
         // Create
         public async Task<ResponseDto<ProductEntryDto>> CreateProductEntry(
             CreateProductEntryDto dto)
         {
+            var transactionStarted = false;
+
             try
             {
                 if (dto == null)
-                    return ResponseDto<ProductEntryDto>.Error("اطلاعات ورودی نامعتبر است");
+                    return ResponseDto<ProductEntryDto>.Error(
+                        "اطلاعات ورودی نامعتبر است");
 
                 if (dto.ProductId <= 0)
-                    return ResponseDto<ProductEntryDto>.Error("محصول انتخاب‌شده معتبر نیست");
+                    return ResponseDto<ProductEntryDto>.Error(
+                        "محصول انتخاب‌شده معتبر نیست");
 
                 if (dto.Quantity <= 0)
-                    return ResponseDto<ProductEntryDto>.Error("تعداد کالا باید بیشتر از صفر باشد");
+                    return ResponseDto<ProductEntryDto>.Error(
+                        "تعداد کالا باید بیشتر از صفر باشد");
 
                 if (dto.UnitPurchasePrice < 0)
-                    return ResponseDto<ProductEntryDto>.Error("قیمت خرید نمی‌تواند منفی باشد");
+                    return ResponseDto<ProductEntryDto>.Error(
+                        "قیمت خرید نمی‌تواند منفی باشد");
 
                 var product = await _productRepository.GetByIdAsync(dto.ProductId);
 
                 if (product == null)
-                    return ResponseDto<ProductEntryDto>.NotFound("محصول موردنظر یافت نشد");
+                    return ResponseDto<ProductEntryDto>.NotFound(
+                        "محصول موردنظر یافت نشد");
 
                 Supplier? supplier = null;
 
                 if (dto.SupplierId.HasValue)
                 {
-                    supplier = await _supplierRepository.GetByIdAsync(dto.SupplierId.Value);
+                    supplier = await _supplierRepository.GetByIdAsync(
+                        dto.SupplierId.Value);
 
                     if (supplier == null)
-                        return ResponseDto<ProductEntryDto>.NotFound("تأمین‌کننده موردنظر یافت نشد");
+                        return ResponseDto<ProductEntryDto>.NotFound(
+                            "تأمین‌کننده موردنظر یافت نشد");
                 }
 
+                await _unitOfWork.BeginTransactionAsync();
+                transactionStarted = true;
+
+                // 1. ثبت ورود کالا
                 var entry = new ProductEntry
                 {
                     EntryDate = dto.EntryDate == default
@@ -79,7 +98,48 @@ namespace Application.Services.ProductEntryServices
                 };
 
                 await _repository.AddAsync(entry);
-                await _unitOfWork.SaveChangesAsync();
+
+                // 2. دریافت یا ایجاد موجودی محصول
+                var inventory = (await _inventoryRepository.GetAllAsync())
+                    .FirstOrDefault(x => x.ProductId == dto.ProductId);
+
+                decimal previousInventory = inventory?.CurrentInventory ?? 0;
+
+                if (inventory == null)
+                {
+                    inventory = new WarehouseInventory
+                    {
+                        ProductId = dto.ProductId,
+                        CurrentInventory = dto.Quantity
+                    };
+
+                    await _inventoryRepository.AddAsync(inventory);
+                }
+                else
+                {
+                    inventory.CurrentInventory += dto.Quantity;
+
+                    _inventoryRepository.Update(inventory);
+                }
+
+                // 3. ثبت گردش موجودی
+                var inventoryTransaction = new InventoryTransaction
+                {
+                    ProductId = dto.ProductId,
+                    TransactionType = InventoryTransactionType.PurchaseEntry,
+                    Quantity = dto.Quantity,
+                    TransactionDate = entry.EntryDate,
+                    ReferenceType = nameof(ProductEntry),
+                    ReferenceId = entry.Id,
+                    Description = dto.Notes
+                };
+
+                await _inventoryTransactionRepository.AddAsync(
+                    inventoryTransaction);
+
+                // ثبت و Commit هر سه عملیات
+                await _unitOfWork.CommitTransactionAsync();
+                transactionStarted = false;
 
                 var result = MapToDto(
                     entry,
@@ -88,22 +148,36 @@ namespace Application.Services.ProductEntryServices
 
                 return ResponseDto<ProductEntryDto>.Success(
                     result,
-                    "ورود کالا با موفقیت ثبت شد");
+                    "ورود کالا و افزایش موجودی انبار با موفقیت ثبت شد");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating product entry");
+
+                if (transactionStarted)
+                {
+                    try
+                    {
+                        await _unitOfWork.RollbackTransactionAsync();
+                    }
+                    catch (Exception rollbackEx)
+                    {
+                        _logger.LogError(
+                            rollbackEx,
+                            "Error rolling back product entry transaction");
+                    }
+                }
 
                 return ResponseDto<ProductEntryDto>.Error(
                     "خطا در ثبت ورود کالا",
                     500);
             }
         }
-
-        // Update
         public async Task<ResponseDto<ProductEntryDto>> UpdateProductEntry(
             UpdateProductEntryDto dto)
         {
+            bool transactionStarted = false;
+
             try
             {
                 if (dto == null || dto.Id <= 0)
@@ -138,6 +212,62 @@ namespace Application.Services.ProductEntryServices
                         return ResponseDto<ProductEntryDto>.NotFound("تأمین‌کننده موردنظر یافت نشد");
                 }
 
+                // ذخیره اطلاعات قبلی قبل از تغییر
+                var oldProductId = entry.ProductId;
+                var oldQuantity = entry.Quantity;
+
+                await _unitOfWork.BeginTransactionAsync();
+                transactionStarted = true;
+
+                // حالت اول: محصول تغییر نکرده است
+                if (oldProductId == dto.ProductId)
+                {
+                    var difference = dto.Quantity - oldQuantity;
+
+                    if (difference != 0)
+                    {
+                        var success = await ApplyInventoryChangeAsync(
+                            oldProductId,
+                            difference,
+                            entry.Id);
+
+                        if (!success)
+                        {
+                            await _unitOfWork.RollbackTransactionAsync();
+                            transactionStarted = false;
+
+                            return ResponseDto<ProductEntryDto>.Error(
+                                "موجودی انبار برای اصلاح این ورود کافی نیست");
+                        }
+                    }
+                }
+                else
+                {
+                    // حالت دوم: محصول تغییر کرده است
+
+                    // برگشت مقدار ورود قبلی از محصول قبلی
+                    var decreaseSuccess = await ApplyInventoryChangeAsync(
+                        oldProductId,
+                        -oldQuantity,
+                        entry.Id);
+
+                    if (!decreaseSuccess)
+                    {
+                        await _unitOfWork.RollbackTransactionAsync();
+                        transactionStarted = false;
+
+                        return ResponseDto<ProductEntryDto>.Error(
+                            "موجودی محصول قبلی برای اصلاح این ورود کافی نیست");
+                    }
+
+                    // افزودن مقدار ورود جدید به محصول جدید
+                    await ApplyInventoryChangeAsync(
+                        dto.ProductId,
+                        dto.Quantity,
+                        entry.Id);
+                }
+
+                // ویرایش اطلاعات ProductEntry
                 entry.EntryDate = dto.EntryDate == default
                     ? entry.EntryDate
                     : dto.EntryDate;
@@ -149,7 +279,9 @@ namespace Application.Services.ProductEntryServices
                 entry.SupplierId = dto.SupplierId;
 
                 _repository.Update(entry);
-                await _unitOfWork.SaveChangesAsync();
+
+                await _unitOfWork.CommitTransactionAsync();
+                transactionStarted = false;
 
                 var result = MapToDto(
                     entry,
@@ -162,6 +294,18 @@ namespace Application.Services.ProductEntryServices
             }
             catch (Exception ex)
             {
+                if (transactionStarted)
+                {
+                    try
+                    {
+                        await _unitOfWork.RollbackTransactionAsync();
+                    }
+                    catch (Exception rollbackEx)
+                    {
+                        _logger.LogError(rollbackEx, "Error rolling back product entry update");
+                    }
+                }
+
                 _logger.LogError(ex, "Error updating product entry {Id}", dto?.Id);
 
                 return ResponseDto<ProductEntryDto>.Error(
@@ -402,6 +546,78 @@ namespace Application.Services.ProductEntryServices
                 SupplierId = entry.SupplierId,
                 SupplierName = supplierName
             };
+        }
+
+        private async Task<bool> ApplyInventoryChangeAsync(
+                int productId,
+                decimal quantityChange,
+                int entryId)
+        {
+            if (quantityChange == 0)
+                return true;
+
+            var inventories = await _inventoryRepository.GetAllAsync();
+
+            var inventory = inventories.FirstOrDefault(
+                x => x.ProductId == productId);
+
+            // کاهش موجودی
+            if (quantityChange < 0)
+            {
+                var decreaseAmount = Math.Abs(quantityChange);
+
+                if (inventory == null ||
+                    inventory.CurrentInventory < decreaseAmount)
+                {
+                    return false;
+                }
+
+                inventory.CurrentInventory -= decreaseAmount;
+                _inventoryRepository.Update(inventory);
+            }
+            // افزایش موجودی
+            else
+            {
+                if (inventory == null)
+                {
+                    inventory = new WarehouseInventory
+                    {
+                        ProductId = productId,
+                        CurrentInventory = quantityChange
+                    };
+
+                    await _inventoryRepository.AddAsync(inventory);
+                }
+                else
+                {
+                    inventory.CurrentInventory += quantityChange;
+                    _inventoryRepository.Update(inventory);
+                }
+            }
+
+            // ثبت تراکنش انبار
+            var inventoryTransaction = new InventoryTransaction
+            {
+                ProductId = productId,
+
+                Quantity = Math.Abs(quantityChange),
+
+                TransactionType = quantityChange > 0
+                    ? InventoryTransactionType.AdjustmentIncrease
+                    : InventoryTransactionType.AdjustmentDecrease,
+
+                TransactionDate = DateTime.UtcNow,
+
+                ReferenceType = "ProductEntryCorrection",
+
+                ReferenceId = entryId,
+
+                Description = "اصلاح موجودی ناشی از ویرایش ورود کالا"
+            };
+
+            await _inventoryTransactionRepository.AddAsync(inventoryTransaction);
+
+            return true;
         }
     }
 }

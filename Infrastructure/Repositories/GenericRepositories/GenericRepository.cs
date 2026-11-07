@@ -24,12 +24,14 @@ namespace Infrastructure.Repositories.GenericRepositories
 
         public async Task<T?> GetByIdAsync(int id)
         {
-            return await _dbSet.FindAsync(id);
+            return await _dbSet.Where(x=>!x.IsDeleted && x.Id==id).FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<T>> GetAllAsync()
         {
-            return await _dbSet.ToListAsync();
+            return await _dbSet
+                .Where(x => !x.IsDeleted)
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<T>> GetAllAsync(
@@ -84,7 +86,8 @@ namespace Infrastructure.Repositories.GenericRepositories
 
         public void Delete(T entity)
         {
-            _dbSet.Remove(entity);
+            entity.IsDeleted = true;
+            _dbSet.Update(entity);
         }
 
         public void HardDelete(T entity)

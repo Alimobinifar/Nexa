@@ -24,6 +24,7 @@ namespace Application.Services.ProductServices
             _categoryRepository = _unitOfWork.Repository<ProductCategory>();
         }
 
+        // Test Done 
         public async Task<ResponseDto<CreateProductDto>> CreateProduct(CreateProductDto product)
         {
             try
@@ -78,6 +79,7 @@ namespace Application.Services.ProductServices
             }
         }
 
+        // Test Done
         public async Task<ResponseDto<UpdateProductDto>> UpdateProduct(UpdateProductDto product)
         {
             try
@@ -186,6 +188,7 @@ namespace Application.Services.ProductServices
 
                 var result = products.Select(p => new ProductDto
                 {
+                    ProductId = p.Id,
                     ProductName = p.ProductName,
                     CategoryId = p.CategoryId,
                     CategoryName = p.Category != null

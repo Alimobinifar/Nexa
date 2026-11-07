@@ -36,6 +36,7 @@ namespace Infrastructure.DataBase
         public DbSet<SaleRegistration> SaleRegistrations { get; set; }
 
         public DbSet<Supplier> Suppliers { get; set; }
+        public DbSet<InventoryTransaction> InventoryTransaction { get; set; }
 
     }
 }

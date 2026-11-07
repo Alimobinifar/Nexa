@@ -15,7 +15,7 @@ namespace Api.Controllers.WarehouseInventoryControllers
             _inventoryService = inventoryService;
         }
 
-        [HttpGet]
+        [HttpGet("GetAll")]
         public async Task<IActionResult> GetAllInventories()
         {
             var response = await _inventoryService.GetAllInventories();
@@ -38,5 +38,7 @@ namespace Api.Controllers.WarehouseInventoryControllers
 
             return StatusCode(response.StatusCode, response);
         }
+
+
     }
 }

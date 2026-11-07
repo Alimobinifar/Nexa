@@ -14,9 +14,9 @@ namespace Api.Controllers.ProductEntryControllers
         {
             _productEntryService = productEntryService;
         }
-
+        
         // Create
-        [HttpPost]
+        [HttpPost("Create")]
         public async Task<IActionResult> CreateProductEntry(
             [FromBody] CreateProductEntryDto dto)
         {
@@ -26,7 +26,7 @@ namespace Api.Controllers.ProductEntryControllers
         }
 
         // Update
-        [HttpPut]
+        [HttpPut("Update")]
         public async Task<IActionResult> UpdateProductEntry(
             [FromBody] UpdateProductEntryDto dto)
         {
@@ -45,7 +45,7 @@ namespace Api.Controllers.ProductEntryControllers
         }
 
         // Get All
-        [HttpGet]
+        [HttpGet("GetAll")]
         public async Task<IActionResult> GetAllProductEntries()
         {
             var response = await _productEntryService.GetAllProductEntries();
@@ -58,38 +58,6 @@ namespace Api.Controllers.ProductEntryControllers
         public async Task<IActionResult> GetProductEntryById(int id)
         {
             var response = await _productEntryService.GetProductEntryById(id);
-
-            return StatusCode(response.StatusCode, response);
-        }
-
-        // Get By Product
-        [HttpGet("product/{productId:int}")]
-        public async Task<IActionResult> GetProductEntriesByProductId(int productId)
-        {
-            var response = await _productEntryService
-                .GetProductEntriesByProductId(productId);
-
-            return StatusCode(response.StatusCode, response);
-        }
-
-        // Get By Supplier
-        [HttpGet("supplier/{supplierId:int}")]
-        public async Task<IActionResult> GetProductEntriesBySupplierId(int supplierId)
-        {
-            var response = await _productEntryService
-                .GetProductEntriesBySupplierId(supplierId);
-
-            return StatusCode(response.StatusCode, response);
-        }
-
-        // Get By Date Range
-        [HttpGet("date-range")]
-        public async Task<IActionResult> GetProductEntriesByDateRange(
-            [FromQuery] DateTime startDate,
-            [FromQuery] DateTime endDate)
-        {
-            var response = await _productEntryService
-                .GetProductEntriesByDateRange(startDate, endDate);
 
             return StatusCode(response.StatusCode, response);
         }
