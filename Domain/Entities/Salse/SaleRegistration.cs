@@ -1,4 +1,5 @@
 ﻿using Domain.Entities.BaseEntities;
+using Domain.Entities.SalesChannels;
 using Domain.Entities.SellingChannels;
 using System;
 using System.Collections.Generic;
@@ -48,6 +49,7 @@ namespace Domain.Entities.Salse
 
         public int ProductId { get; set; }
         public Domain.Entities.Products.Product Product { get; set; } = null!;
+
 
         #endregion
 

@@ -18,8 +18,8 @@ namespace Domain.Entities.Products
         #region NavigationProperty And Relations
         public int CategoryId { get; set; }
         public ProductCategory Category { get; set; }
-        public ICollection<ProductChannelAllocation> ChannelAllocations { get; set; }
-    = new List<ProductChannelAllocation>();
+        public ICollection<ProductChannelAllocation> ProductChannelAllocations { get; set; }
+             = new List<ProductChannelAllocation>();
         #endregion
     }
 }

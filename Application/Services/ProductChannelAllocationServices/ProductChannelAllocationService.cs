@@ -341,6 +341,27 @@ namespace Application.Services.ProductChannelAllocationServices
 
         #endregion
 
+        #region Reduce Channel Product
+        public async Task<bool> ReduceChannelAllocationAsync(
+            int productId,
+            int channelId,
+            int quantity)
+        {
+            var allocation = await _repository
+                .FirstOrDefaultAsync(x =>
+                    x.ProductId == productId &&
+                    x.ChannelId == channelId);
+
+            if (allocation == null ||
+                allocation.AvailableQuantity < quantity)
+                return false;
+
+            allocation.SoldQuantity += quantity;
+
+            return true;
+        }
+        #endregion
+
         #region Mapping
 
         private static ProductChannelAllocationDto MapToDto(

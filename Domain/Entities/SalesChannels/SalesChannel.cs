@@ -1,4 +1,5 @@
 ﻿using Domain.Entities.BaseEntities;
+using Domain.Entities.SalesChannels;
 using Domain.Entities.Salse;
 using System;
 using System.Collections.Generic;
@@ -26,14 +27,15 @@ namespace Domain.Entities.SellingChannels
         // شماره پشتیبانی
         public string? SupportPhone { get; set; }
 
-
         // ترتیب نمایش
         public int DisplayOrder { get; set; }
 
         #region Navigation Properties
-
-        public ICollection<SaleRegistration> SaleRegistrations { get; set; }
-            = new List<SaleRegistration>();
+        public ICollection<SaleRegistration> SaleRegistrations
+        { get; set; } = new List<SaleRegistration>();
+        public ICollection<ProductChannelAllocation>
+        ProductChannelAllocations
+        { get; set; } = new List<ProductChannelAllocation>();
 
         #endregion
     }

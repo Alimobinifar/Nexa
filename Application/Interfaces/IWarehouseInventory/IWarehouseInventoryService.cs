@@ -13,5 +13,6 @@ namespace Application.Interfaces.IWarehouseInventory
         Task<ResponseDto<WarehouseInventoryDto>> GetInventoryById(int id);
 
         Task<ResponseDto<WarehouseInventoryDto>> GetInventoryByProductId(int productId);
+        Task<bool> ReduceInventoryAsync(int productId, int quantity);
     }
 }

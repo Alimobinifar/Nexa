@@ -1,9 +1,11 @@
 ﻿using Application.Interfaces.IWarehouseInventory;
+using Application.Interfaces.ProductAllocations;
 using Application.Interfaces.ProductEntries;
 using Application.Interfaces.Products;
 using Application.Interfaces.SaleChannels;
 using Application.Interfaces.SalesRegistration;
 using Application.Interfaces.Suppliers;
+using Application.Services.ProductChannelAllocationServices;
 using Application.Services.ProductEntryServices;
 using Application.Services.ProductServices;
 using Application.Services.SaleRegistrationServices;
@@ -25,6 +27,7 @@ namespace Application.Extensions
             services.AddScoped<ISaleRegistrationService,SaleRegistrationService>();
             services.AddScoped<ISalesChannelService, SalesChannelService>();
             services.AddScoped<IWarehouseInventoryService, WarehouseInventoryService>();
+            services.AddScoped<IProductChannelAllocationService, ProductChannelAllocationService>();
             services.AddScoped<IProductEntryService, ProductEntryService>();
             return services;
         }

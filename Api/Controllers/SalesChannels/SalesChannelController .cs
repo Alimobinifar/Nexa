@@ -16,7 +16,7 @@ namespace Api.Controllers.SalesChannels
             _salesChannelService = salesChannelService;
         }
 
-        [HttpPost]
+        [HttpPost("Create")]
         public async Task<IActionResult> CreateSalesChannel(
             [FromBody] CreateSalesChannelDto dto)
         {
@@ -45,7 +45,7 @@ namespace Api.Controllers.SalesChannels
             return StatusCode(response.StatusCode, response);
         }
 
-        [HttpGet]
+        [HttpGet("GetAll")]
         public async Task<IActionResult> GetAllSalesChannels()
         {
             var response =

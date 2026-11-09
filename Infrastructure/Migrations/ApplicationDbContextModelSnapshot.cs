@@ -240,17 +240,15 @@ namespace Infrastructure.Migrations
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
-                    b.Property<int>("SalesChannelId")
-                        .HasColumnType("int");
-
                     b.Property<int>("SoldQuantity")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductId");
+                    b.HasIndex("ChannelId");
 
-                    b.HasIndex("SalesChannelId");
+                    b.HasIndex("ProductId", "ChannelId")
+                        .IsUnique();
 
                     b.ToTable("ProductChannelAllocations");
                 });
@@ -264,16 +262,19 @@ namespace Infrastructure.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("BuyPrice")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("ChannelId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("CommissionCost")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("CommissionRate")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(5, 2)
+                        .HasColumnType("decimal(5,2)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -285,12 +286,15 @@ namespace Infrastructure.Migrations
                         .HasColumnType("bit");
 
                     b.Property<decimal>("NetProfit")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("NetProfitPercent")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("PackingPrice")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("ProductId")
@@ -300,25 +304,26 @@ namespace Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("PurchaseNetCost")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("SalePrice")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("SalesChannelId")
-                        .HasColumnType("int");
-
                     b.Property<decimal>("SendPrice")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("TotalSaleAmount")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductId");
+                    b.HasIndex("ChannelId");
 
-                    b.HasIndex("SalesChannelId");
+                    b.HasIndex("ProductId");
 
                     b.ToTable("SaleRegistrations");
                 });
@@ -335,7 +340,8 @@ namespace Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<decimal>("DefaultCommissionRate")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(5, 2)
+                        .HasColumnType("decimal(5,2)");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
@@ -344,6 +350,7 @@ namespace Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("FixedFee")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<bool>("IsActive")
@@ -354,7 +361,8 @@ namespace Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("SupportPhone")
                         .HasColumnType("nvarchar(max)");
@@ -701,16 +709,16 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.SalesChannels.ProductChannelAllocation", b =>
                 {
-                    b.HasOne("Domain.Entities.Products.Product", "Product")
-                        .WithMany("ChannelAllocations")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.HasOne("Domain.Entities.SellingChannels.SalesChannel", "SalesChannel")
+                        .WithMany("ProductChannelAllocations")
+                        .HasForeignKey("ChannelId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.SellingChannels.SalesChannel", "SalesChannel")
-                        .WithMany()
-                        .HasForeignKey("SalesChannelId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.HasOne("Domain.Entities.Products.Product", "Product")
+                        .WithMany("ProductChannelAllocations")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Product");
@@ -720,16 +728,16 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Salse.SaleRegistration", b =>
                 {
+                    b.HasOne("Domain.Entities.SellingChannels.SalesChannel", "SalesChannel")
+                        .WithMany("SaleRegistrations")
+                        .HasForeignKey("ChannelId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("Domain.Entities.Products.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.SellingChannels.SalesChannel", "SalesChannel")
-                        .WithMany("SaleRegistrations")
-                        .HasForeignKey("SalesChannelId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Product");
@@ -795,11 +803,13 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Products.Product", b =>
                 {
-                    b.Navigation("ChannelAllocations");
+                    b.Navigation("ProductChannelAllocations");
                 });
 
             modelBuilder.Entity("Domain.Entities.SellingChannels.SalesChannel", b =>
                 {
+                    b.Navigation("ProductChannelAllocations");
+
                     b.Navigation("SaleRegistrations");
                 });
 #pragma warning restore 612, 618

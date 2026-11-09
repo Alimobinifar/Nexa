@@ -27,7 +27,7 @@ namespace Domain.Entities.SalesChannels
         public int ProductId { get; set; }
 
         public Domain.Entities.Products.Product Product { get; set; } = null!;
-
+         
         #endregion
     }
 }

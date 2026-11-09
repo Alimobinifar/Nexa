@@ -28,5 +28,10 @@ namespace Application.Interfaces.ProductAllocations
 
         Task<ResponseDto<List<ProductChannelAllocationDto>>>
             GetAllocationsByChannelId(int channelId);
+
+        Task<bool> ReduceChannelAllocationAsync(
+            int productId,
+            int channelId,
+            int quantity);
     }
 }

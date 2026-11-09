@@ -17,7 +17,7 @@ namespace Api.Controllers.ProductChannelAllocationControllers
             _service = service;
         }
 
-        [HttpPost]
+        [HttpPost("Create")]
         public async Task<IActionResult> CreateAllocation(
             [FromBody] CreateProductChannelAllocationDto dto)
         {
@@ -43,7 +43,7 @@ namespace Api.Controllers.ProductChannelAllocationControllers
             return StatusCode(response.StatusCode, response);
         }
 
-        [HttpGet]
+        [HttpGet("GetAll")]
         public async Task<IActionResult> GetAllAllocations()
         {
             var response = await _service.GetAllAllocations();

@@ -1,7 +1,11 @@
-﻿using Application.Interfaces.SalesRegistration;
+﻿using Application.Interfaces.IWarehouseInventory;
+using Application.Interfaces.ProductAllocations;
+using Application.Interfaces.SalesRegistration;
 using Contracts.Cmmon.Dtos.ResultAndResponse;
 using Contracts.Cmmon.Dtos.SaleRegistration;
+using Domain.Entities.Inventories;
 using Domain.Entities.Products;
+using Domain.Entities.SalesChannels;
 using Domain.Entities.Salse;
 using Domain.Entities.SellingChannels;
 using Domain.Interfaces.GenericInterfaces;
@@ -19,116 +23,93 @@ namespace Application.Services.SaleRegistrationServices
         private readonly IGenericRepository<SaleRegistration> _saleRepository;
         private readonly IGenericRepository<Product> _productRepository;
         private readonly IGenericRepository<SalesChannel> _channelRepository;
+        private readonly IGenericRepository<WarehouseInventory> _warehouseInventory;
+        private readonly IGenericRepository<ProductChannelAllocation> _productChannelAllocation;
+        private readonly IWarehouseInventoryService _wareHouseService;
+        private readonly IProductChannelAllocationService _allocationService;
+
 
         public SaleRegistrationService(
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork, IWarehouseInventoryService wareHouseService, IProductChannelAllocationService allocationService)
         {
             _unitOfWork = unitOfWork;
             _saleRepository = _unitOfWork.Repository<SaleRegistration>();
             _productRepository = _unitOfWork.Repository<Product>();
             _channelRepository = _unitOfWork.Repository<SalesChannel>();
-        }
-
-        private static string? ValidateFinancialData(
-            int quantity,
-            decimal salePrice,
-            decimal buyPrice,
-            decimal sendPrice,
-            decimal packingPrice,
-            decimal commissionRate)
-        {
-            if (quantity <= 0)
-                return "تعداد محصول باید بیشتر از صفر باشد.";
-
-            if (salePrice < 0 || buyPrice < 0 ||
-                sendPrice < 0 || packingPrice < 0)
-                return "مقادیر قیمت و هزینه نمی‌توانند منفی باشند.";
-
-            if (commissionRate < 0 || commissionRate > 100)
-                return "درصد کمیسیون باید بین صفر تا صد باشد.";
-
-            return null;
-        }
-
-        private static SaleRegistrationDto MapToDto(
-            SaleRegistration sale)
-        {
-            return new SaleRegistrationDto
-            {
-                Id = sale.Id,
-                ProductQuantity = sale.ProductQuantity,
-                SalePrice = sale.SalePrice,
-                BuyPrice = sale.BuyPrice,
-                SendPrice = sale.SendPrice,
-                PackingPrice = sale.PackingPrice,
-                CommissionRate = sale.CommissionRate,
-
-                TotalSaleAmount = sale.TotalSaleAmount,
-                PurchaseNetCost = sale.PurchaseNetCost,
-                CommissionCost = sale.CommissionCost,
-                NetProfit = sale.NetProfit,
-                NetProfitPercent = sale.NetProfitPercent,
-
-                ProductId = sale.ProductId,
-                ProductName = sale.Product?.ProductName ?? string.Empty,
-
-                ChannelId = sale.ChannelId,
-                ChannelName = sale.SalesChannel?.Name ?? string.Empty
-            };
+            _warehouseInventory = _unitOfWork.Repository<WarehouseInventory>();
+            _productChannelAllocation = _unitOfWork.Repository<ProductChannelAllocation>();
+            _wareHouseService = wareHouseService;
+            _allocationService = allocationService;
         }
 
         public async Task<ResponseDto<SaleRegistrationDto>>
             CreateSaleRegistration(CreateSaleRegistrationDto dto)
         {
+            bool transactionStarted = false;
+
             try
             {
-                if (dto == null)
-                    return ResponseDto<SaleRegistrationDto>.Error(
-                        "اطلاعات ارسالی معتبر نیست.");
-
-                var validation = ValidateFinancialData(
-                    dto.ProductQuantity,
-                    dto.SalePrice,
-                    dto.BuyPrice,
-                    dto.SendPrice,
-                    dto.PackingPrice,
-                    dto.CommissionRate);
+                // 1. اعتبارسنجی اطلاعات ورودی
+                var validation = ValidateSaleRequest(dto);
 
                 if (validation != null)
                     return ResponseDto<SaleRegistrationDto>.Error(validation);
 
-                if (dto.ProductId <= 0 || dto.ChannelId <= 0)
-                    return ResponseDto<SaleRegistrationDto>.Error(
-                        "محصول یا کانال فروش معتبر نیست.");
-
+                // 2. دریافت محصول
                 var product = await _productRepository.GetByIdAsync(dto.ProductId);
 
                 if (product == null)
                     return ResponseDto<SaleRegistrationDto>.NotFound(
                         "محصول موردنظر یافت نشد.");
 
+                // 3. دریافت کانال فروش
                 var channel = await _channelRepository.GetByIdAsync(dto.ChannelId);
 
                 if (channel == null)
                     return ResponseDto<SaleRegistrationDto>.NotFound(
                         "کانال فروش موردنظر یافت نشد.");
 
-                var sale = new SaleRegistration
-                {
-                    ProductQuantity = dto.ProductQuantity,
-                    SalePrice = dto.SalePrice,
-                    BuyPrice = dto.BuyPrice,
-                    SendPrice = dto.SendPrice,
-                    PackingPrice = dto.PackingPrice,
-                    CommissionRate = dto.CommissionRate,
-                    ProductId = dto.ProductId,
-                    ChannelId = dto.ChannelId
-                };
+                // 4. بررسی اولیه موجودی
+                var inventoryValidation =
+                    await ValidateInventoryAsync(dto, product.ProductName);
 
-                sale.CalculateFinancials();
+                if (inventoryValidation != null)
+                    return ResponseDto<SaleRegistrationDto>.Error(inventoryValidation);
+
+                // 5. شروع تراکنش
+                await _unitOfWork.BeginTransactionAsync();
+                transactionStarted = true;
+
+                // 6. کاهش موجودی انبار
+                var warehouseResult = await _wareHouseService
+                    .ReduceInventoryAsync(dto.ProductId, dto.ProductQuantity);
+
+                if (!warehouseResult)
+                    throw new InvalidOperationException(
+                        "کاهش موجودی انبار انجام نشد.");
+
+                // 7. کاهش تخصیص کانال
+                var allocationResult = await _allocationService
+                    .ReduceChannelAllocationAsync(
+                        dto.ProductId,
+                        dto.ChannelId,
+                        dto.ProductQuantity);
+
+                if (!allocationResult)
+                    throw new InvalidOperationException(
+                        "کاهش موجودی تخصیص کانال انجام نشد.");
+
+                // 8. ساخت و ثبت فروش
+                var sale = CreateSaleEntity(dto);
 
                 await _saleRepository.AddAsync(sale);
+
+                // 9. ذخیره تمام تغییرات
                 await _unitOfWork.SaveChangesAsync();
+
+                // 10. تأیید تراکنش
+                await _unitOfWork.CommitTransactionAsync();
+                transactionStarted = false;
 
                 sale.Product = product;
                 sale.SalesChannel = channel;
@@ -139,7 +120,11 @@ namespace Application.Services.SaleRegistrationServices
             }
             catch (Exception ex)
             {
-
+                // در صورت بروز خطا، تمام تغییرات برگردانده می‌شوند.
+                if (transactionStarted)
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                }
 
                 return ResponseDto<SaleRegistrationDto>.Error(
                     "در ثبت اطلاعات فروش خطایی رخ داد.", 500);
@@ -354,5 +339,124 @@ namespace Application.Services.SaleRegistrationServices
                     "در دریافت سوابق کانال فروش خطایی رخ داد.", 500);
             }
         }
+
+
+        #region Privatemethods and Helpers
+        private async Task<string?> ValidateInventoryAsync(
+         CreateSaleRegistrationDto dto,
+         string productName)
+        {
+            // بررسی موجودی انبار
+            bool isAvailable = await _warehouseInventory.AnyAsync(x =>
+                x.ProductId == dto.ProductId &&
+                x.CurrentInventory >= dto.ProductQuantity
+            );
+
+            if (!isAvailable)
+                return $"موجودی محصول {productName} در انبار کافی نیست.";
+
+            // بررسی سهمیه اختصاص داده شده به کانال فروش
+            bool isAllocated = await _productChannelAllocation.AnyAsync(x =>
+                x.ProductId == dto.ProductId &&
+                x.ChannelId == dto.ChannelId &&
+                (x.AllocatedQuantity - x.SoldQuantity) >= dto.ProductQuantity
+            );
+
+            if (!isAllocated)
+                return $"این تعداد محصول {productName} به کانال فروش تخصیص پیدا نکرده است.";
+
+            return null;
+        }
+
+        private SaleRegistration CreateSaleEntity(
+              CreateSaleRegistrationDto dto)
+        {
+            var sale = new SaleRegistration
+            {
+                ProductQuantity = dto.ProductQuantity,
+                SalePrice = dto.SalePrice,
+                BuyPrice = dto.BuyPrice,
+                SendPrice = dto.SendPrice,
+                PackingPrice = dto.PackingPrice,
+                CommissionRate = dto.CommissionRate,
+                ProductId = dto.ProductId,
+                ChannelId = dto.ChannelId
+            };
+
+            sale.CalculateFinancials();
+
+            return sale;
+        }
+
+        private static string? ValidateFinancialData(
+           int quantity,
+           decimal salePrice,
+           decimal buyPrice,
+           decimal sendPrice,
+           decimal packingPrice,
+           decimal commissionRate)
+        {
+            if (quantity <= 0)
+                return "تعداد محصول باید بیشتر از صفر باشد.";
+
+            if (salePrice < 0 || buyPrice < 0 ||
+                sendPrice < 0 || packingPrice < 0)
+                return "مقادیر قیمت و هزینه نمی‌توانند منفی باشند.";
+
+            if (commissionRate < 0 || commissionRate > 100)
+                return "درصد کمیسیون باید بین صفر تا صد باشد.";
+
+            return null;
+        }
+
+        private static SaleRegistrationDto MapToDto(
+          SaleRegistration sale)
+        {
+            return new SaleRegistrationDto
+            {
+                Id = sale.Id,
+                ProductQuantity = sale.ProductQuantity,
+                SalePrice = sale.SalePrice,
+                BuyPrice = sale.BuyPrice,
+                SendPrice = sale.SendPrice,
+                PackingPrice = sale.PackingPrice,
+                CommissionRate = sale.CommissionRate,
+
+                TotalSaleAmount = sale.TotalSaleAmount,
+                PurchaseNetCost = sale.PurchaseNetCost,
+                CommissionCost = sale.CommissionCost,
+                NetProfit = sale.NetProfit,
+                NetProfitPercent = sale.NetProfitPercent,
+
+                ProductId = sale.ProductId,
+                ProductName = sale.Product?.ProductName ?? string.Empty,
+
+                ChannelId = sale.ChannelId,
+                ChannelName = sale.SalesChannel?.Name ?? string.Empty
+            };
+        }
+
+        private string? ValidateSaleRequest(CreateSaleRegistrationDto dto)
+        {
+            if (dto == null)
+                return "اطلاعات ارسالی معتبر نیست.";
+
+            var validation = ValidateFinancialData(
+                dto.ProductQuantity,
+                dto.SalePrice,
+                dto.BuyPrice,
+                dto.SendPrice,
+                dto.PackingPrice,
+                dto.CommissionRate);
+
+            if (validation != null)
+                return validation;
+
+            if (dto.ProductId <= 0 || dto.ChannelId <= 0)
+                return "محصول یا کانال فروش معتبر نیست.";
+
+            return null;
+        }
+        #endregion
     }
 }

@@ -143,5 +143,18 @@ namespace Application.Services.WarehouseInventoryServices
                     500);
             }
         }
+
+        public async Task<bool> ReduceInventoryAsync(int productId, int quantity)
+        {
+            var inventory = await _repository
+                .FirstOrDefaultAsync(x => x.ProductId == productId);
+
+            if (inventory == null || inventory.CurrentInventory < quantity)
+                return false;
+
+            inventory.CurrentInventory -= quantity;
+
+            return true;
+        }
     }
 }
