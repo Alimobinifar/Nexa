@@ -10,5 +10,6 @@ namespace Domain.Entities.BaseEntities
         public bool IsDeleted { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime? UpdatedAt { get; set; } = null;
     }
 }

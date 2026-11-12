@@ -11,7 +11,7 @@ namespace Infrastructure.Repositories.UnitOfWorkRepositories
 
     public class UnitOfWork : IUnitOfWork
     {
-        private readonly ApplicationDbContext _context;
+        private readonly MasterDbContext _context;
 
         private readonly Dictionary<Type, object> _repositories = new();
 
@@ -19,7 +19,7 @@ namespace Infrastructure.Repositories.UnitOfWorkRepositories
 
         private bool disposedValue;
 
-        public UnitOfWork(ApplicationDbContext context)
+        public UnitOfWork(MasterDbContext context)
         {
             _context = context;
         }

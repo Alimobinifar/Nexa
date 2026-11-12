@@ -8,7 +8,7 @@ namespace Domain.Interfaces.UnitOfWork
 {
     public interface IUnitOfWork:IDisposable
     {
-        IGenericRepository<T> Repository<T>() where T : BaseModel;
+        IGenericRepository<T> Repository<T>() where T : BaseModel; 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
         Task BeginTransactionAsync();
         Task CommitTransactionAsync();

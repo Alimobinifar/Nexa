@@ -27,7 +27,7 @@ namespace Domain.Entities.Users
         public string? AvatarUrl { get; set; }       
         public string? Bio { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime? UpdatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? UpdatedAt { get; set; } = null;
         public bool IsDeleted { get; set; } = false;
         public bool IsActive { get; set; } = true;
     }

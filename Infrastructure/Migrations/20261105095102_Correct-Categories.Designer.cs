@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Infrastructure.Migrations
 {
-    [DbContext(typeof(ApplicationDbContext))]
+    [DbContext(typeof(MasterDbContext))]
     [Migration("20261105095102_Correct-Categories")]
     partial class CorrectCategories
     {

@@ -5,36 +5,27 @@ using Domain.Entities.SalesChannels;
 using Domain.Entities.Salse;
 using Domain.Entities.SellingChannels;
 using Domain.Entities.Suppliers;
-using Domain.Entities.Users;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace Infrastructure.DataBase
 {
-    public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, int>
+    public class TenantDbContext : DbContext
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-                    : base(options)
+        public TenantDbContext(DbContextOptions<TenantDbContext> options)
+            : base(options)
         {
         }
 
-        public DbSet<User> Users { get; set; }
-
         public DbSet<Product> Products { get; set; }
-
         public DbSet<WarehouseInventory> WarehouseInventory { get; set; }
-
         public DbSet<ProductCategory> ProductCategories { get; set; }
-
         public DbSet<ProductEntry> ProductEntries { get; set; }
-
         public DbSet<ProductChannelAllocation> ProductChannelAllocations { get; set; }
-
         public DbSet<SalesChannel> SalesChannels { get; set; }
-
         public DbSet<SaleRegistration> SaleRegistrations { get; set; }
-
         public DbSet<Supplier> Suppliers { get; set; }
         public DbSet<InventoryTransaction> InventoryTransaction { get; set; }
 
@@ -57,35 +48,16 @@ namespace Infrastructure.DataBase
                       .HasForeignKey(x => x.ProductId)
                       .OnDelete(DeleteBehavior.Restrict);
 
-                entity.Property(x => x.SalePrice)
-                      .HasPrecision(18, 2);
-
-                entity.Property(x => x.BuyPrice)
-                      .HasPrecision(18, 2);
-
-                entity.Property(x => x.SendPrice)
-                      .HasPrecision(18, 2);
-
-                entity.Property(x => x.PackingPrice)
-                      .HasPrecision(18, 2);
-
-                entity.Property(x => x.CommissionRate)
-                      .HasPrecision(5, 2);
-
-                entity.Property(x => x.TotalSaleAmount)
-                      .HasPrecision(18, 2);
-
-                entity.Property(x => x.PurchaseNetCost)
-                      .HasPrecision(18, 2);
-
-                entity.Property(x => x.CommissionCost)
-                      .HasPrecision(18, 2);
-
-                entity.Property(x => x.NetProfit)
-                      .HasPrecision(18, 2);
-
-                entity.Property(x => x.NetProfitPercent)
-                      .HasPrecision(18, 2);
+                entity.Property(x => x.SalePrice).HasPrecision(18, 2);
+                entity.Property(x => x.BuyPrice).HasPrecision(18, 2);
+                entity.Property(x => x.SendPrice).HasPrecision(18, 2);
+                entity.Property(x => x.PackingPrice).HasPrecision(18, 2);
+                entity.Property(x => x.CommissionRate).HasPrecision(5, 2);
+                entity.Property(x => x.TotalSaleAmount).HasPrecision(18, 2);
+                entity.Property(x => x.PurchaseNetCost).HasPrecision(18, 2);
+                entity.Property(x => x.CommissionCost).HasPrecision(18, 2);
+                entity.Property(x => x.NetProfit).HasPrecision(18, 2);
+                entity.Property(x => x.NetProfitPercent).HasPrecision(18, 2);
             });
 
             // SalesChannel Configuration
@@ -95,13 +67,11 @@ namespace Infrastructure.DataBase
                       .IsRequired()
                       .HasMaxLength(200);
 
-                entity.Property(x => x.DefaultCommissionRate)
-                      .HasPrecision(5, 2);
-
-                entity.Property(x => x.FixedFee)
-                      .HasPrecision(18, 2);
+                entity.Property(x => x.DefaultCommissionRate).HasPrecision(5, 2);
+                entity.Property(x => x.FixedFee).HasPrecision(18, 2);
             });
 
+            // ProductChannelAllocation Configuration
             modelBuilder.Entity<ProductChannelAllocation>(entity =>
             {
                 entity.HasKey(x => x.Id);

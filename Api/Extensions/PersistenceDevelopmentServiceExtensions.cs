@@ -31,7 +31,7 @@ namespace Api.Extensions
             IConfiguration configuration,
             string connectionStringName)
         {
-            services.AddDbContext<ApplicationDbContext>(options =>
+            services.AddDbContext<MasterDbContext>(options =>
                 options.UseSqlServer(
                     configuration.GetConnectionString(connectionStringName)));
 
