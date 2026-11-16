@@ -1,0 +1,310 @@
+﻿@inherits LayoutComponentBase
+
+<div class="layout-wrapper" dir="rtl">
+
+    <!-- دکمه باز کردن منو در موبایل -->
+    <button type="button"
+            class="mobile-menu-btn"
+            @onclick="OpenMobileMenu">
+        ☰
+    </button>
+
+    <!-- پس زمینه تاریک موبایل -->
+    @if (IsMobileMenuOpen)
+    {
+        <div class="sidebar-overlay"
+             @onclick="CloseMobileMenu">
+        </div>
+    }
+
+    <!-- سایدبار -->
+    <aside class="sidebar
+        @(IsCollapsed ? "collapsed" : "")
+        @(IsMobileMenuOpen ? "mobile-open" : "")">
+
+        <!-- هدر -->
+        <div class="sidebar-header">
+
+            <div class="brand">
+                <div class="brand-icon">📦</div>
+
+                @if (!IsCollapsed)
+                {
+                    <span class="brand-text">سیستم مدیریت فروشگاه نکسا</span>
+                }
+            </div>
+
+            <button type="button"
+                    class="toggle-btn"
+                    @onclick="ToggleSidebar"
+                    title="باز و بسته کردن منو">
+                ☰
+            </button>
+
+            <!-- دکمه بستن موبایل -->
+            <button type="button"
+                    class="mobile-close-btn"
+                    @onclick="CloseMobileMenu">
+                ✕
+            </button>
+
+        </div>
+
+        <!-- منوی اصلی -->
+        <nav class="sidebar-menu">
+
+            <ul>
+
+                <!-- داشبورد -->
+                <li>
+                    <NavLink href="/"
+                             Match="NavLinkMatch.All"
+                             class="menu-link">
+                        <span class="icon">🏠</span>
+                        <span class="text">داشبورد</span>
+                    </NavLink>
+                </li>
+
+                <!-- موجودی -->
+                <li class="has-children @(IsInventoryOpen ? "open" : "")">
+
+                    <div class="menu-link parent"
+                         @onclick="ToggleInventory">
+
+                        <span class="icon">📦</span>
+                        <span class="text">محصولات</span>
+                        <span class="arrow">▾</span>
+
+                    </div>
+
+                    <ul class="submenu">
+                        <li>
+                            <NavLink href="/Products/Create" class="menu-link">
+                                ساخت محصول جدید 
+                            </NavLink>
+                        </li>
+
+                        <li>
+                            <NavLink href="/Products/List" class="menu-link">
+                               لیست محصولات
+                            </NavLink>
+                        </li>
+
+                    </ul>
+
+                </li>
+
+                <!-- انبارها -->
+                <li>
+                    <NavLink href="/warehouses" class="menu-link">
+                        <span class="icon">🏭</span>
+                        <span class="text">انبارها</span>
+                    </NavLink>
+                </li>
+
+                <!-- تأمین‌کنندگان -->
+                <li>
+                    <NavLink href="/suppliers" class="menu-link">
+                        <span class="icon">🤝</span>
+                        <span class="text">تأمین‌کنندگان</span>
+                    </NavLink>
+                </li>
+
+                <!-- سفارشات خرید -->
+                <li class="has-children @(IsOrdersOpen ? "open" : "")">
+
+                    <div class="menu-link parent"
+                         @onclick="ToggleOrders">
+
+                        <span class="icon">🛒</span>
+                        <span class="text">سفارشات خرید</span>
+                        <span class="arrow">▾</span>
+
+                    </div>
+
+                    <ul class="submenu">
+                        <li>
+                            <NavLink href="/orders/list" class="menu-link">
+                                لیست سفارشات
+                            </NavLink>
+                        </li>
+
+                        <li>
+                            <NavLink href="/orders/new" class="menu-link">
+                                سفارش جدید
+                            </NavLink>
+                        </li>
+
+                        <li>
+                            <NavLink href="/orders/pending" class="menu-link">
+                                در انتظار تأیید
+                            </NavLink>
+                        </li>
+                    </ul>
+
+                </li>
+
+                <!-- محموله‌ها -->
+                <li>
+                    <NavLink href="/shipments" class="menu-link">
+                        <span class="icon">🚚</span>
+                        <span class="text">محموله‌ها</span>
+                    </NavLink>
+                </li>
+
+                <!-- ردیابی -->
+                <li>
+                    <NavLink href="/tracking" class="menu-link">
+                        <span class="icon">📍</span>
+                        <span class="text">ردیابی</span>
+                    </NavLink>
+                </li>
+
+                <!-- گزارش‌ها -->
+                <li class="has-children @(IsReportsOpen ? "open" : "")">
+
+                    <div class="menu-link parent"
+                         @onclick="ToggleReports">
+
+                        <span class="icon">📊</span>
+                        <span class="text">گزارش‌ها</span>
+                        <span class="arrow">▾</span>
+
+                    </div>
+
+                    <ul class="submenu">
+                        <li>
+                            <NavLink href="/reports/sales" class="menu-link">
+                                فروش
+                            </NavLink>
+                        </li>
+
+                        <li>
+                            <NavLink href="/reports/inventory" class="menu-link">
+                                موجودی
+                            </NavLink>
+                        </li>
+
+                        <li>
+                            <NavLink href="/reports/financial" class="menu-link">
+                                مالی
+                            </NavLink>
+                        </li>
+                    </ul>
+
+                </li>
+
+                <!-- جریان نقدی -->
+                <li>
+                    <NavLink href="/cashflow" class="menu-link">
+                        <span class="icon">💰</span>
+                        <span class="text">جریان نقدی</span>
+                    </NavLink>
+                </li>
+
+                <!-- مشتریان -->
+                <li>
+                    <NavLink href="/customers" class="menu-link">
+                        <span class="icon">👥</span>
+                        <span class="text">مشتریان</span>
+                    </NavLink>
+                </li>
+
+            </ul>
+
+        </nav>
+
+        <!-- اطلاعات کاربر -->
+        <div class="sidebar-footer">
+
+            <div class="user-card">
+
+                <div class="avatar">ر</div>
+
+                @if (!IsCollapsed)
+                {
+                    <div class="user-info">
+                        <div class="name">راکیب کوشر</div>
+                        <div class="role">مدیر سیستم</div>
+                    </div>
+                }
+
+            </div>
+
+        </div>
+
+    </aside>
+
+    <!-- محتوای اصلی -->
+    <main class="main @(IsCollapsed ? "expanded" : "")">
+
+        <div class="main-inner">
+            @Body
+        </div>
+
+    </main>
+
+</div>
+
+@code {
+
+    private bool IsCollapsed = false;
+
+    private bool IsMobileMenuOpen = false;
+
+    private bool IsInventoryOpen = true;
+
+    private bool IsOrdersOpen = false;
+
+    private bool IsReportsOpen = false;
+
+
+    // جمع و باز کردن منو در دسکتاپ
+    private void ToggleSidebar()
+    {
+        IsCollapsed = !IsCollapsed;
+
+        if (IsCollapsed)
+        {
+            IsInventoryOpen = false;
+            IsOrdersOpen = false;
+            IsReportsOpen = false;
+        }
+    }
+
+
+    // باز کردن منوی موبایل
+    private void OpenMobileMenu()
+    {
+        IsMobileMenuOpen = true;
+    }
+
+
+    // بستن منوی موبایل
+    private void CloseMobileMenu()
+    {
+        IsMobileMenuOpen = false;
+    }
+
+
+    // زیرمنوی موجودی
+    private void ToggleInventory()
+    {
+        IsInventoryOpen = !IsInventoryOpen;
+    }
+
+
+    // زیرمنوی سفارشات
+    private void ToggleOrders()
+    {
+        IsOrdersOpen = !IsOrdersOpen;
+    }
+
+
+    // زیرمنوی گزارش‌ها
+    private void ToggleReports()
+    {
+        IsReportsOpen = !IsReportsOpen;
+    }
+
+}

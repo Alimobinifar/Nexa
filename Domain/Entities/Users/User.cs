@@ -1,12 +1,13 @@
 ﻿using Domain.Entities.BaseEntities;
+using Domain.Entities.Tenants;
+using Domain.Enums;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 //using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
-using Domain.Enums;
 
 namespace Domain.Entities.Users
 {
@@ -30,5 +31,7 @@ namespace Domain.Entities.Users
         public DateTime? UpdatedAt { get; set; } = null;
         public bool IsDeleted { get; set; } = false;
         public bool IsActive { get; set; } = true;
+        public int? TenantId { get; set; }     // برای SuperAdmin خالی (null) است
+        public Tenant? Tenant { get; set; }
     }
 }

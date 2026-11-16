@@ -1,0 +1,301 @@
+﻿@page "/Products/Create"
+@using MudBlazor
+
+<PageTitle>ساخت محصول جدید | اینونتو</PageTitle>
+
+<div class="product-page" dir="rtl">
+
+    <!-- سربرگ صفحه -->
+    <div class="page-header">
+
+        <div class="page-heading">
+            <div class="page-icon">
+                <MudIcon Icon="@Icons.Material.Filled.AddBox" Size="Size.Large" />
+            </div>
+
+            <div>
+                <MudText Typo="Typo.h5" Class="page-title">
+                    ساخت محصول جدید
+                </MudText>
+
+                <MudText Typo="Typo.body2" Class="page-subtitle">
+                    اطلاعات محصول جدید را وارد کنید تا به فهرست محصولات اضافه شود.
+                </MudText>
+            </div>
+        </div>
+
+        <MudButton Variant="Variant.Outlined"
+                   Color="Color.Default"
+                   StartIcon="@Icons.Material.Filled.ArrowForward"
+                   Href="/inventory/products">
+            بازگشت به محصولات
+        </MudButton>
+
+    </div>
+
+    <!-- پیام نتیجه -->
+    @if (!string.IsNullOrWhiteSpace(_message))
+    {
+        <MudAlert Severity="Severity.Info"
+                  Variant="Variant.Outlined"
+                  Class="mb-4">
+            @_message
+        </MudAlert>
+    }
+
+    <MudForm @ref="_form">
+
+        <MudGrid Spacing="3">
+
+            <!-- اطلاعات اصلی -->
+            <MudItem xs="12">
+
+                <MudPaper Class="form-card" Elevation="0">
+
+                    <div class="card-heading">
+                        <div class="section-icon">
+                            <MudIcon Icon="@Icons.Material.Filled.Inventory2" />
+                        </div>
+
+                        <div>
+                            <MudText Typo="Typo.h6" Class="section-title">
+                                اطلاعات اصلی محصول
+                            </MudText>
+
+                            <MudText Typo="Typo.caption" Class="section-subtitle">
+                                مشخصات عمومی و شناسایی محصول
+                            </MudText>
+                        </div>
+                    </div>
+
+                    <MudDivider Class="my-4" />
+
+                    <MudGrid Spacing="3">
+
+                        <MudItem xs="12" md="6">
+                            <MudTextField T="string"
+                                          @bind-Value="_productName"
+                                          Label="نام محصول"
+                                          Placeholder="مثلاً لپ‌تاپ ایسوس"
+                                          Variant="Variant.Outlined"
+                                          Margin="Margin.Dense"
+                                          Required="true"
+                                          RequiredError="نام محصول الزامی است"
+                                          FullWidth="true"
+                                          Adornment="Adornment.Start"
+                                          AdornmentIcon="@Icons.Material.Filled.Inventory" />
+                        </MudItem>
+
+                        <MudItem xs="12" md="3">
+                            <MudTextField T="string"
+                                          @bind-Value="_sku"
+                                          Label="کد محصول (SKU)"
+                                          Placeholder="مثلاً PRD-1001"
+                                          Variant="Variant.Outlined"
+                                          Margin="Margin.Dense"
+                                          FullWidth="true" />
+                        </MudItem>
+
+                        <MudItem xs="12" md="3">
+                            <MudTextField T="string"
+                                          @bind-Value="_barcode"
+                                          Label="بارکد"
+                                          Placeholder="شماره بارکد"
+                                          Variant="Variant.Outlined"
+                                          Margin="Margin.Dense"
+                                          FullWidth="true"
+                                          Adornment="Adornment.Start"
+                                          AdornmentIcon="@Icons.Material.Filled.QrCode" />
+                        </MudItem>
+
+                        <MudItem xs="12" md="6">
+                            <MudSelect T="string"
+                                       @bind-Value="_category"
+                                       Label="دسته‌بندی محصول"
+                                       Placeholder="انتخاب دسته‌بندی"
+                                       Variant="Variant.Outlined"
+                                       Margin="Margin.Dense"
+                                       Required="true"
+                                       RequiredError="دسته‌بندی را انتخاب کنید"
+                                       FullWidth="true">
+
+                                <MudSelectItem Value="@("electronics")">
+                                    کالای دیجیتال
+                                </MudSelectItem>
+
+                                <MudSelectItem Value="@("computer")">
+                                    تجهیزات کامپیوتری
+                                </MudSelectItem>
+
+                                <MudSelectItem Value="@("office")">
+                                    لوازم اداری
+                                </MudSelectItem>
+
+                                <MudSelectItem Value="@("accessories")">
+                                    لوازم جانبی
+                                </MudSelectItem>
+
+                                <MudSelectItem Value="@("other")">
+                                    سایر محصولات
+                                </MudSelectItem>
+
+                            </MudSelect>
+                        </MudItem>
+
+                        <MudItem xs="12" md="6">
+                            <MudSelect T="string"
+                                       @bind-Value="_unit"
+                                       Label="واحد اندازه‌گیری"
+                                       Variant="Variant.Outlined"
+                                       Margin="Margin.Dense"
+                                       Required="true"
+                                       RequiredError="واحد اندازه‌گیری را انتخاب کنید"
+                                       FullWidth="true">
+
+                                <MudSelectItem Value="@("عدد")">عدد</MudSelectItem>
+                                <MudSelectItem Value="@("بسته")">بسته</MudSelectItem>
+                                <MudSelectItem Value="@("کارتن")">کارتن</MudSelectItem>
+                                <MudSelectItem Value="@("کیلوگرم")">کیلوگرم</MudSelectItem>
+                                <MudSelectItem Value="@("متر")">متر</MudSelectItem>
+                                <MudSelectItem Value="@("لیتر")">لیتر</MudSelectItem>
+
+                            </MudSelect>
+                        </MudItem>
+
+                        <MudItem xs="12">
+                            <MudTextField T="string"
+                                          @bind-Value="_description"
+                                          Label="توضیحات محصول"
+                                          Placeholder="توضیحات تکمیلی درباره محصول..."
+                                          Variant="Variant.Outlined"
+                                          Lines="4"
+                                          Margin="Margin.Dense"
+                                          FullWidth="true" />
+                        </MudItem>
+
+                    </MudGrid>
+
+                </MudPaper>
+
+            </MudItem>
+
+            <!-- وضعیت محصول -->
+            <MudItem xs="12">
+
+                <MudPaper Class="form-card status-card" Elevation="0">
+
+                    <div>
+                        <MudText Typo="Typo.subtitle1" Class="section-title">
+                            وضعیت محصول
+                        </MudText>
+
+                        <MudText Typo="Typo.caption" Class="section-subtitle">
+                            مشخص کنید محصول پس از ثبت فعال باشد یا خیر.
+                        </MudText>
+                    </div>
+
+                    <MudSwitch T="bool"
+                               @bind-Value="_isActive"
+                               Color="Color.Primary"
+                               Label="@(_isActive ? "فعال" : "غیرفعال")" />
+
+                </MudPaper>
+
+            </MudItem>
+
+
+            <!-- دکمه های عملیات -->
+            <MudItem xs="12">
+
+                <div class="form-actions">
+
+                    <MudButton Variant="Variant.Text"
+                               Color="Color.Default"
+                               Href="/inventory/products">
+                        انصراف
+                    </MudButton>
+
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.Save"
+                               OnClick="SaveProduct"
+                               Disabled="_isSaving">
+
+                        @if (_isSaving)
+                        {
+                            <MudProgressCircular Size="Size.Small"
+                                                 Indeterminate="true"
+                                                 Class="ml-2" />
+                            <span>در حال بررسی...</span>
+                        }
+                        else
+                        {
+                            <span>ثبت محصول</span>
+                        }
+
+                    </MudButton>
+
+                </div>
+
+            </MudItem>
+
+        </MudGrid>
+
+    </MudForm>
+
+</div>
+
+@code {
+
+    private MudForm? _form;
+
+    private bool _isSaving = false;
+
+    private bool _isActive = true;
+
+    private string? _message;
+
+    // اطلاعات اصلی
+    private string _productName = "";
+    private string _sku = "";
+    private string _barcode = "";
+    private string _category = "";
+    private string _unit = "عدد";
+    private string _description = "";
+
+    // اطلاعات مالی
+    private decimal _purchasePrice = 0;
+    private decimal _sellingPrice = 0;
+
+    // اطلاعات موجودی
+    private decimal _initialStock = 0;
+    private decimal _minimumStock = 0;
+
+
+    private async Task SaveProduct()
+    {
+        if (_form == null)
+            return;
+
+        _isSaving = true;
+        _message = null;
+
+        try
+        {
+            await _form.Validate();
+
+            if (!_form.IsValid)
+                return;
+
+            // در این قسمت باید اطلاعات محصول به سرویس
+            // و دیتابیس پروژه ارسال شوند.
+
+            _message = "اعتبارسنجی اطلاعات با موفقیت انجام شد. برای ذخیره نهایی، اتصال به سرویس محصولات لازم است.";
+        }
+        finally
+        {
+            _isSaving = false;
+        }
+    }
+
+}

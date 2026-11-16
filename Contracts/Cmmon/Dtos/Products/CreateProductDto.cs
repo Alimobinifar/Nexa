@@ -10,6 +10,9 @@ namespace Contracts.Cmmon.Dtos.Product
         [Required]
         public string ProductName { get; set; }
         public int CategoryId { get; set; }
+        public string MeasureUnit { get; set; }
+        public string? ProductCode { get; set; }
+        public string? ProductBarcode { get; set; }
         public string? ProductDescription { get; set; }
     }
 }

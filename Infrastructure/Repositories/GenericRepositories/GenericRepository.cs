@@ -13,10 +13,10 @@ namespace Infrastructure.Repositories.GenericRepositories
     public class GenericRepository<T> : IGenericRepository<T>
         where T : BaseModel
     {
-        protected readonly MasterDbContext _context;
+        protected readonly TenantDbContext _context;
         protected readonly DbSet<T> _dbSet;
 
-        public GenericRepository(MasterDbContext context)
+        public GenericRepository(TenantDbContext context)
         {
             _context = context;
             _dbSet = context.Set<T>();

@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/FronEnd/">
+    <Project Path="Nexa.Front/Nexa.Front.csproj" Id="b6f77218-b447-4aa7-bc89-7f42eae462dc" />
+  </Folder>
   <Project Path="Api/Api.csproj" />
   <Project Path="Application/Application.csproj" />
   <Project Path="Contracts/Contracts.csproj" />

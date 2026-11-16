@@ -24,4 +24,5 @@ namespace Infrastructure.Tenancy
                 return int.TryParse(value, out var id) ? id : null;
             }
         }
+    }
 }

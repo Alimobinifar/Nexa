@@ -1,4 +1,5 @@
 ﻿using Domain.Entities.Inventories;
+using Domain.Entities.Others;
 using Domain.Entities.Product;
 using Domain.Entities.Products;
 using Domain.Entities.SalesChannels;
@@ -20,7 +21,7 @@ namespace Infrastructure.DataBase
         {
         }
         public DbSet<Tenant> Tenants { get; set; }
-
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -62,6 +63,25 @@ namespace Infrastructure.DataBase
                 entity.Property(x => x.AvatarUrl)
                       .HasMaxLength(500);
             });
+
+            modelBuilder.Entity<RefreshToken>(entity =>
+            {
+                entity.HasKey(x => x.Id);
+                entity.Property(x => x.TokenHash).IsRequired().HasMaxLength(200);
+                entity.HasIndex(x => x.TokenHash).IsUnique();
+                entity.Ignore(x => x.IsActive);
+
+                entity.HasOne<User>()
+                      .WithMany()
+                      .HasForeignKey(x => x.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<User>()
+                .HasOne(x => x.Tenant)
+                .WithMany()
+                .HasForeignKey(x => x.TenantId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

@@ -1,0 +1,235 @@
+﻿
+@font-face {
+    font-family: 'BTrafficBold';
+    src: url('/fonts/BTrafficBold.ttf') format('truetype'); /* بدون پوشه fonts */
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+/* فقط صفحه ثبت محصول */
+.product-page {
+    direction: rtl;
+    font-family: 'BTrafficBold', Tahoma, sans-serif;
+    color: #1e293b;
+}
+    /* برای اینکه لیبل از راست شروع شود */
+    .product-page ::deep .mud-input-label {
+        right: 0;
+        left: auto !important;
+        font-size: 18px !important;
+        text-align: right !important;
+    }
+
+    /* برای اینکه متن داخل فیلد هم راست‌چین باشد */
+    .product-page ::deep .mud-input-slot {
+        text-align: right !important;
+        font-size: 16px !important;
+        direction: rtl !important;
+    }
+    /* اصلاح موقعیت برچسب‌ها در فیلدهای Outlined */
+    .product-page ::deep .mud-input-outlined .mud-input-label {
+        right: 14px !important; /* فاصله از سمت راست */
+        left: auto !important;
+        transform-origin: top right !important;
+    }
+
+
+    /* برای اینکه آیکون‌های داخل فیلد (مثل بارکد) کمی از لبه فاصله بگیرند و با متن تداخل نکنند */
+    .product-page ::deep .mud-input-adornment-start {
+        margin-right: 10px;
+    }
+
+        .product-page ::deep .mud-input-adornment-start .mud-icon-root {
+            font-size: 1.8rem; /* کمی بزرگتر کردن آیکون‌ها */
+        }
+
+    /* اصلاح فاصله‌گذاری داخلی فیلدها برای جلوگیری از به هم ریختگی */
+    .product-page ::deep .mud-input-root {
+        padding-right: 12px !important;
+    }
+    /* ۳. اختصاصی برای فیلدهایی که آیکون در سمت راست دارند (مثل بارکد) */
+    .product-page ::deep .mud-input-adornment-start {
+        margin-right: 20px !important; /* حذف فاصله اضافی */
+        margin-left: 8px !important; /* فاصله آیکون از متن */
+    }
+
+    .product-page ::deep .mud-select .mud-input-label {
+        right: 14px !important;
+    }
+    /* سایز متن‌های راهنما (Placeholder) */
+    .product-page ::deep .mud-input-slot {
+    }
+    /* متن‌های MudBlazor در همین صفحه */
+    .product-page ::deep .mud-typography,
+    .product-page ::deep .mud-input,
+    .product-page ::deep .mud-input-label,
+    .product-page ::deep .mud-button,
+    .product-page ::deep .mud-select,
+    .product-page ::deep .mud-alert,
+    .product-page ::deep .mud-switch,
+    .product-page ::deep .mud-input-slot,
+    .product-page ::deep .mud-list-item {
+        font-family: 'BTrafficBold', Tahoma, sans-serif !important;
+    }
+
+    /* سربرگ */
+    .product-page .page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .product-page .page-heading {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .product-page .page-icon {
+        width: 52px;
+        height: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #eef2ff;
+        color: #6366f1;
+        border-radius: 14px;
+    }
+
+    .product-page .page-title {
+        color: #1e293b !important;
+        font-size: 25px;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+    .product-page .page-subtitle {
+        color: #64748b;
+        font-size: 15px;
+    }
+
+    /* کارت‌ها */
+    .product-page .form-card {
+        background: #fff;
+        border: 1px solid #e8edf5;
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 12px;
+        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+    }
+
+    /* عنوان هر بخش */
+    .product-page .card-heading {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .product-page .section-icon {
+        width: 42px;
+        height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #eef2ff;
+        color: #6366f1;
+        border-radius: 12px;
+    }
+
+    .product-page .financial-icon {
+        background: #ecfdf5;
+        color: #059669;
+    }
+
+    .product-page .stock-icon {
+        background: #fff7ed;
+        color: #ea580c;
+    }
+
+    .product-page .section-title {
+        color: #1e293b;
+        font-size: 18px;
+        font-weight: 700;
+    }
+
+    .product-page .section-subtitle {
+        color: #94a3b8;
+        font-size: 14px;
+    }
+
+    /* فیلدهای فرم */
+    .product-page ::deep .mud-input-control {
+        margin-top: 20px !important; /* ایجاد فاصله از بالا */
+        margin-bottom: 16px !important;
+    }
+
+    .product-page ::deep .mud-input-outlined {
+        border-radius: 10px;
+    }
+
+    .product-page ::deep .mud-input-label {
+        font-size: 15px;
+    }
+
+    .product-page ::deep .mud-input {
+        font-size: 20px;
+    }
+
+    /* کارت وضعیت */
+    .product-page .status-card {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+    }
+
+    /* دکمه‌ها */
+    .product-page .form-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 12px;
+        padding: 8px 0 24px;
+    }
+
+    .product-page ::deep .mud-button-root {
+        border-radius: 10px;
+        font-weight: 600;
+        min-height: 42px;
+        padding-inline: 20px;
+    }
+
+/* موبایل */
+@media (max-width: 768px) {
+    .product-page {
+        padding: 14px;
+    }
+
+        .product-page .form-card {
+            padding: 16px;
+        }
+
+        .product-page .page-header {
+            align-items: flex-start;
+        }
+
+        .product-page .page-title {
+            font-size: 21px;
+        }
+
+        .product-page .status-card {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .product-page .form-actions {
+            justify-content: stretch;
+        }
+
+            .product-page .form-actions ::deep .mud-button-root {
+                flex: 1;
+            }
+}
