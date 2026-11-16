@@ -8,7 +8,7 @@ namespace Domain.Entities.Tenants
 {
     public class Tenant:BaseModel
     {
-        public string Name { get; set; } = null!;
+        public string Name { get; set; } = null!; // This is a sample name 
         public string ConnectionString { get; set; } = null!;
         public TenantStatus Status { get; set; } = TenantStatus.Provisioning;
     }

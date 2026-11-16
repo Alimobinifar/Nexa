@@ -18,5 +18,10 @@ namespace Contracts.Cmmon.Dtos.Product
 
         public IEnumerable<ProductCategoryDto> SubCategories { get; set; }
             = new List<ProductCategoryDto>();
+
+        public List<ProductCategoryDto> Children { get; set; } = [];
     }
+
+
+
 }

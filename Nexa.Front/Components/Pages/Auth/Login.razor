@@ -1,0 +1,94 @@
+﻿@page "/Auth/login"
+@layout EmptyLayout
+@using MudBlazor
+
+<PageTitle>ورود به سیستم</PageTitle>
+
+<div class="login-page">
+    <MudPaper Class="login-card" Elevation="8">
+        
+        <div class="login-header">
+            <MudText Typo="Typo.h4" Class="login-title">ورود به سیستم</MudText>
+            <MudText Typo="Typo.body2" Class="login-subtitle">لطفاً اطلاعات خود را وارد کنید</MudText>
+        </div>
+
+        <MudForm @ref="form" @bind-IsValid="@success">
+            
+            <MudTextField @bind-Value="username"
+                          Label="نام کاربری"
+                          Variant="Variant.Outlined"
+                          Class="mb-4"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Person"
+                          Required="true"
+                          RequiredError="نام کاربری الزامی است" />
+
+            <MudTextField @bind-Value="password"
+                          Label="رمز عبور"
+                          Variant="Variant.Outlined"
+                          InputType="@PasswordInput"
+                          Adornment="Adornment.End"
+                          AdornmentIcon="@PasswordInputIcon"
+                          OnAdornmentClick="TogglePasswordVisibility"
+                          Class="mb-6"
+                          Required="true"
+                          RequiredError="رمز عبور الزامی است" />
+
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       FullWidth="true"
+                       Size="Size.Large"
+                       Class="login-btn"
+                       OnClick="HandleLogin"
+                       Disabled="@(!success)">
+                ورود
+            </MudButton>
+
+        </MudForm>
+
+    </MudPaper>
+</div>
+
+
+@code {
+    private MudForm form;
+    private bool success;
+    private string username = "";
+    private string password = "";
+
+    // کنترل نمایش/مخفی کردن رمز عبور
+    private bool isShowPassword = false;
+    private InputType PasswordInput = InputType.Password;
+    private string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+
+    private void TogglePasswordVisibility()
+    {
+        if (isShowPassword)
+        {
+            isShowPassword = false;
+            PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+            PasswordInput = InputType.Password;
+        }
+        else
+        {
+            isShowPassword = true;
+            PasswordInputIcon = Icons.Material.Filled.Visibility;
+            PasswordInput = InputType.Text;
+        }
+    }
+
+    private async Task HandleLogin()
+    {
+        await form.Validate();
+
+        if (success)
+        {
+            // اینجا منطق ورود رو بنویس
+            // مثلاً:
+            // var result = await AuthService.Login(username, password);
+            // if (result.Succeeded) Navigation.NavigateTo("/");
+            
+            Console.WriteLine($"Username: {username} | Password: {password}");
+        }
+    }
+}

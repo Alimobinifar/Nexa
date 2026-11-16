@@ -1,6 +1,8 @@
 
 using MudBlazor.Services;
 using Nexa.Front.Components;
+using Nexa.Front.Services.Products;
+using Nexa.Front.Services.Products.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +21,7 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     app.UseHsts();
 }
+
 
 app.UseStatusCodePagesWithReExecute(
     "/not-found",

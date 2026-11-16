@@ -19,8 +19,11 @@ namespace Infrastructure.Tenancy
         {
             get
             {
-                var value = _accessor.HttpContext?.User.FindFirst("tenant_id")?.Value;
-                return int.TryParse(value, out var id) ? id : null;
+
+                var value = _accessor.HttpContext?
+                  .User.FindFirst("tenant_id")?.Value;
+
+                return int.TryParse(value, out var id) ? id : (int?)null;
             }
         }
     }
