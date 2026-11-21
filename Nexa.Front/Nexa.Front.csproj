@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <PackageReference Include="MudBlazor" Version="9.13.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.23.0" />
   </ItemGroup>
 
   <ItemGroup>

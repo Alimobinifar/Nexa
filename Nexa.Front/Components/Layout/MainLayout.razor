@@ -1,4 +1,8 @@
 ﻿@inherits LayoutComponentBase
+@inject NavigationManager Navigation
+@implements IDisposable
+
+
 
 <div class="layout-wrapper" dir="rtl">
 
@@ -72,7 +76,7 @@
                          @onclick="ToggleInventory">
 
                         <span class="icon">📦</span>
-                        <span class="text">محصولات</span>
+                        <span class="text">مدیریت محصولات</span>
                         <span class="arrow">▾</span>
 
                     </div>
@@ -80,13 +84,13 @@
                     <ul class="submenu">
                         <li>
                             <NavLink href="/Products/Create" class="menu-link">
-                                ساخت محصول جدید 
+                                اضافه کردن محصول جدید
                             </NavLink>
                         </li>
 
                         <li>
                             <NavLink href="/Products/List" class="menu-link">
-                               لیست محصولات
+                                لیست محصولات
                             </NavLink>
                         </li>
 
@@ -95,20 +99,107 @@
                 </li>
 
                 <!-- انبارها -->
-                <li>
-                    <NavLink href="/warehouses" class="menu-link">
+                <li class="has-children @(IsWarehousesOpen ? "open" : "")">
+
+                    <div class="menu-link parent"
+                         @onclick="ToggleWarehouses">
+
                         <span class="icon">🏭</span>
                         <span class="text">انبارها</span>
-                    </NavLink>
+                        <span class="arrow">▾</span>
+
+                    </div>
+
+                    <ul class="submenu">
+
+                        <li>
+                            <NavLink href="/warehouses/entry" class="menu-link">
+                                ثبت ورود کالا
+                            </NavLink>
+                        </li>
+
+                        <li>
+                            <NavLink href="/warehouses/exit" class="menu-link">
+                                ثبت خروج کالا
+                            </NavLink>
+                        </li>
+
+                        <li>
+                            <NavLink href="/warehouses/inventory" class="menu-link">
+                                موجودی انبار
+                            </NavLink>
+                        </li>
+
+                    </ul>
+
                 </li>
 
                 <!-- تأمین‌کنندگان -->
-                <li>
-                    <NavLink href="/suppliers" class="menu-link">
+                <li class="has-children @(IsSuppliersOpen ? "open" : "")">
+
+                    <div class="menu-link parent"
+                         @onclick="ToggleSuppliers">
+
                         <span class="icon">🤝</span>
-                        <span class="text">تأمین‌کنندگان</span>
-                    </NavLink>
+                        <span class="text">مدیریت تامین کنندگان</span>
+                        <span class="arrow">▾</span>
+
+                    </div>
+
+                    <ul class="submenu">
+
+                        <li>
+                            <NavLink href="/suppliers/create" class="menu-link">
+                                اضافه کردن تامین کننده
+                            </NavLink>
+                        </li>
+
+                        <li>
+                            <NavLink href="/suppliers/list" class="menu-link">
+                                لیست تامین کنندگان
+                            </NavLink>
+                        </li>
+
+                    </ul>
+
                 </li>
+
+                <li class="has-children @(IsSaleChannelsOpen ? "open" : "")">
+
+                    <div class="menu-link parent"
+                         @onclick="ToggleSaleChannels">
+
+                        <span class="icon">🏭</span>
+                        <span class="text">کانال های فروش</span>
+                        <span class="arrow">▾</span>
+
+                    </div>
+
+                    <ul class="submenu">
+
+                        <li>
+                            <NavLink href="/warehouses/entry" class="menu-link">
+                                ثبت کانال فروش 
+                            </NavLink>
+                        </li>
+
+                        <li>
+                            <NavLink href="/warehouses/exit" class="menu-link">
+                               لیست کانال های فروش 
+                            </NavLink>
+                        </li>
+
+                        <li>
+                            <NavLink href="/warehouses/inventory" class="menu-link">
+                                تنظیمات کانال ها
+                            </NavLink>
+                        </li>
+
+                    </ul>
+
+                </li>
+
+
 
                 <!-- سفارشات خرید -->
                 <li class="has-children @(IsOrdersOpen ? "open" : "")">
@@ -117,7 +208,7 @@
                          @onclick="ToggleOrders">
 
                         <span class="icon">🛒</span>
-                        <span class="text">سفارشات خرید</span>
+                        <span class="text"> مدیریت فروش و هزینه</span>
                         <span class="arrow">▾</span>
 
                     </div>
@@ -125,39 +216,28 @@
                     <ul class="submenu">
                         <li>
                             <NavLink href="/orders/list" class="menu-link">
-                                لیست سفارشات
+                                فروش ها (فاکتور ها )
                             </NavLink>
                         </li>
 
                         <li>
                             <NavLink href="/orders/new" class="menu-link">
-                                سفارش جدید
+                                ثبت فاکتور فروش جدید
                             </NavLink>
                         </li>
 
                         <li>
                             <NavLink href="/orders/pending" class="menu-link">
-                                در انتظار تأیید
+                               ثبت پیش فاکتور 
+                            </NavLink>
+                        </li>
+                        <li>
+                            <NavLink href="/orders/pending" class="menu-link">
+                              ثبت هزینه
                             </NavLink>
                         </li>
                     </ul>
 
-                </li>
-
-                <!-- محموله‌ها -->
-                <li>
-                    <NavLink href="/shipments" class="menu-link">
-                        <span class="icon">🚚</span>
-                        <span class="text">محموله‌ها</span>
-                    </NavLink>
-                </li>
-
-                <!-- ردیابی -->
-                <li>
-                    <NavLink href="/tracking" class="menu-link">
-                        <span class="icon">📍</span>
-                        <span class="text">ردیابی</span>
-                    </NavLink>
                 </li>
 
                 <!-- گزارش‌ها -->
@@ -175,38 +255,65 @@
                     <ul class="submenu">
                         <li>
                             <NavLink href="/reports/sales" class="menu-link">
-                                فروش
+                                فروش 
                             </NavLink>
                         </li>
 
                         <li>
                             <NavLink href="/reports/inventory" class="menu-link">
-                                موجودی
+                                موجودی کالا ها و انبار
                             </NavLink>
                         </li>
 
                         <li>
                             <NavLink href="/reports/financial" class="menu-link">
-                                مالی
+                                صورت سود و زیان 
                             </NavLink>
                         </li>
                     </ul>
 
                 </li>
 
-                <!-- جریان نقدی -->
-                <li>
-                    <NavLink href="/cashflow" class="menu-link">
-                        <span class="icon">💰</span>
-                        <span class="text">جریان نقدی</span>
-                    </NavLink>
-                </li>
-
                 <!-- مشتریان -->
-                <li>
-                    <NavLink href="/customers" class="menu-link">
+                <li class="has-children @(IsCustomersOpen ? "open" : "")">
+
+                    <div class="menu-link parent"
+                         @onclick="ToggleCustomers">
+
                         <span class="icon">👥</span>
                         <span class="text">مشتریان</span>
+                        <span class="arrow">▾</span>
+
+                    </div>
+
+                    <ul class="submenu">
+
+                        <li>
+                            <NavLink href="/customers/create" class="menu-link">
+                                ثبت مشتری جدید
+                            </NavLink>
+                        </li>
+
+                        <li>
+                            <NavLink href="/customers/list" class="menu-link">
+                                لیست مشتریان
+                            </NavLink>
+                        </li>
+
+                        <li>
+                            <NavLink href="/customers/club" class="menu-link">
+                                باشگاه مشتریان
+                            </NavLink>
+                        </li>
+
+                    </ul>
+
+                </li>
+
+                <li>
+                    <NavLink href="/logout" class="menu-link">
+                        <span class="icon">🚪</span>
+                        <span class="text">خروج</span>
                     </NavLink>
                 </li>
 
@@ -224,7 +331,7 @@
                 @if (!IsCollapsed)
                 {
                     <div class="user-info">
-                        <div class="name">راکیب کوشر</div>
+                        <div class="name">علی مبینی فر</div>
                         <div class="role">مدیر سیستم</div>
                     </div>
                 }
@@ -252,11 +359,71 @@
 
     private bool IsMobileMenuOpen = false;
 
-    private bool IsInventoryOpen = true;
+    private bool IsInventoryOpen = false;
 
     private bool IsOrdersOpen = false;
 
     private bool IsReportsOpen = false;
+
+    private bool IsSuppliersOpen = false;
+
+    private bool IsCustomersOpen = false;
+
+    private bool IsWarehousesOpen = false;
+
+    private bool IsSaleChannelsOpen = false;
+
+
+    protected override void OnInitialized()
+    {
+        Navigation.LocationChanged += OnLocationChanged;
+
+        UpdateOpenMenu(Navigation.Uri);
+    }
+
+    private void OnLocationChanged(
+        object? sender,
+        Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+    {
+        InvokeAsync(() =>
+        {
+            UpdateOpenMenu(e.Location);
+            StateHasChanged();
+        });
+    }
+
+    private void UpdateOpenMenu(string url)
+    {
+        var path = Navigation.ToBaseRelativePath(url)
+            .Split('?')[0]
+            .Split('#')[0]
+            .Trim('/');
+
+        IsInventoryOpen = path.StartsWith(
+            "Products", StringComparison.OrdinalIgnoreCase);
+
+        IsWarehousesOpen = path.StartsWith(
+            "warehouses", StringComparison.OrdinalIgnoreCase);
+
+        IsSuppliersOpen = path.StartsWith(
+            "suppliers", StringComparison.OrdinalIgnoreCase);
+
+        IsSaleChannelsOpen = path.StartsWith(
+            "sales-channels", StringComparison.OrdinalIgnoreCase);
+
+        IsOrdersOpen = path.StartsWith(
+            "orders", StringComparison.OrdinalIgnoreCase);
+
+        IsReportsOpen = path.StartsWith(
+            "reports", StringComparison.OrdinalIgnoreCase);
+
+        IsCustomersOpen = path.StartsWith(
+            "customers", StringComparison.OrdinalIgnoreCase);
+    }
+    public void Dispose()
+    {
+        Navigation.LocationChanged -= OnLocationChanged;
+    }
 
 
     // جمع و باز کردن منو در دسکتاپ
@@ -269,6 +436,10 @@
             IsInventoryOpen = false;
             IsOrdersOpen = false;
             IsReportsOpen = false;
+            IsSuppliersOpen = false;
+            IsCustomersOpen = false;
+            IsWarehousesOpen = false;
+            IsSaleChannelsOpen = false;
         }
     }
 
@@ -294,6 +465,12 @@
     }
 
 
+    private void ToggleSuppliers()
+    {
+        IsSuppliersOpen = !IsSuppliersOpen;
+    }
+
+
     // زیرمنوی سفارشات
     private void ToggleOrders()
     {
@@ -305,6 +482,22 @@
     private void ToggleReports()
     {
         IsReportsOpen = !IsReportsOpen;
+    }
+
+    // زیرمنوی گزارش‌ها
+    private void ToggleCustomers()
+    {
+        IsCustomersOpen = !IsCustomersOpen;
+    }
+
+    private void ToggleWarehouses()
+    {
+        IsWarehousesOpen = !IsWarehousesOpen;
+    }
+
+    private void ToggleSaleChannels()
+    {
+        IsSaleChannelsOpen = !IsSaleChannelsOpen;
     }
 
 }

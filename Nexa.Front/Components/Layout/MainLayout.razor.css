@@ -68,7 +68,7 @@
 }
 
 .brand-text {
-    font-size: 20px;
+    font-size: 12px;
     font-weight: 700;
     color: #1e293b;
     white-space: nowrap;
@@ -422,5 +422,39 @@
     .main-inner {
         padding-left: 12px;
         padding-right: 12px;
+    }
+    /* آیتم انتخاب شده در زیرمنو */
+    .sidebar-menu .submenu .menu-link.active {
+        background: #2563eb;
+        color: #ffffff !important;
+        font-weight: 700;
+        border-right: 4px solid #f59e0b;
+        border-radius: 8px;
+    }
+
+    /* هدر زیرمنوی باز */
+    .sidebar-menu .has-children.open > .menu-link.parent {
+        background: #1e40af;
+        color: #ffffff;
+        font-weight: 700;
+        border-radius: 8px;
+    }
+
+        /* رنگ آیکون و فلش در حالت باز */
+        .sidebar-menu .has-children.open > .menu-link.parent .icon,
+        .sidebar-menu .has-children.open > .menu-link.parent .arrow {
+            color: #ffffff;
+        }
+
+    /* افکت هاور آیتم‌های منو */
+    .sidebar-menu .submenu .menu-link:hover {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    /* افکت هاور هدرها */
+    .sidebar-menu .menu-link.parent:hover {
+        background: #1d4ed8;
+        color: #ffffff;
     }
 }

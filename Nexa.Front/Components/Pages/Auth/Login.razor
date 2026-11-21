@@ -1,94 +1,366 @@
-﻿@page "/Auth/login"
+﻿@page "/login"
 @layout EmptyLayout
+@attribute [Microsoft.AspNetCore.Authorization.AllowAnonymous]
 @using MudBlazor
 
 <PageTitle>ورود به سیستم</PageTitle>
 
-<div class="login-page">
-    <MudPaper Class="login-card" Elevation="8">
-        
+<div class="login-page" dir="rtl">
+    <MudPaper Class="login-card" Elevation="0">
+
         <div class="login-header">
-            <MudText Typo="Typo.h4" Class="login-title">ورود به سیستم</MudText>
-            <MudText Typo="Typo.body2" Class="login-subtitle">لطفاً اطلاعات خود را وارد کنید</MudText>
+            <div class="logo-container">
+                <MudIcon Icon="@Icons.Material.Filled.Lock" Size="Size.Large" Style="color: #3b82f6;" />
+            </div>
+            <MudText Typo="Typo.h4" Class="login-title">خوش آمدید</MudText>
+            <MudText Typo="Typo.body2" Class="login-subtitle">برای ادامه، اطلاعات خود را وارد کنید</MudText>
         </div>
 
-        <MudForm @ref="form" @bind-IsValid="@success">
-            
-            <MudTextField @bind-Value="username"
-                          Label="نام کاربری"
-                          Variant="Variant.Outlined"
-                          Class="mb-4"
-                          Adornment="Adornment.Start"
-                          AdornmentIcon="@Icons.Material.Filled.Person"
-                          Required="true"
-                          RequiredError="نام کاربری الزامی است" />
+        @* [جدید] پیام خطا: وقتی نام کاربری یا رمز اشتباه باشد، سرور با ?error=1 برمی‌گرداند *@
+        @if (Error is not null)
+        {
+            <div class="login-error">نام کاربری یا رمز عبور اشتباه است.</div>
+        }
 
-            <MudTextField @bind-Value="password"
-                          Label="رمز عبور"
-                          Variant="Variant.Outlined"
-                          InputType="@PasswordInput"
-                          Adornment="Adornment.End"
-                          AdornmentIcon="@PasswordInputIcon"
-                          OnAdornmentClick="TogglePasswordVisibility"
-                          Class="mb-6"
-                          Required="true"
-                          RequiredError="رمز عبور الزامی است" />
+        @* [جدید] به‌جای MudForm، فرم HTML معمولی؛ چون ساخت کوکی فقط با درخواست HTTP واقعی ممکن است *@
+        <form method="post" action="/auth/login">
 
-            <MudButton Variant="Variant.Filled"
-                       Color="Color.Primary"
-                       FullWidth="true"
-                       Size="Size.Large"
-                       Class="login-btn"
-                       OnClick="HandleLogin"
-                       Disabled="@(!success)">
-                ورود
-            </MudButton>
+            <div class="input-group">
+                @* [جدید] به‌جای MudTextField: input معمولی با name (نام باید دقیقاً userName باشد) *@
+                <label class="field-label">نام کاربری</label>
+                <input class="field-input" name="userName" required autocomplete="username" />
+            </div>
 
-        </MudForm>
+            <div class="input-group">
+                <label class="field-label">رمز عبور</label>
+
+                <div class="password-wrapper">
+                    <input class="field-input"
+                           name="password"
+                           type="@(ShowPassword ? "text" : "password")"
+                           required
+                           autocomplete="current-password" />
+
+                    <button type="button"
+                            class="password-toggle"
+                            @onclick="TogglePasswordVisibility">
+
+                        <MudIcon Icon="@(ShowPassword
+                                 ? Icons.Material.Filled.VisibilityOff
+                             : Icons.Material.Filled.Visibility)"
+                                 Size="Size.Medium" />
+
+                    </button>
+                </div>
+            </div>
+
+            @* [جدید] چک‌باکس «مرا به خاطر بسپار» *@
+            <div class="input-group">
+                <label class="remember">
+                    <input type="checkbox" name="rememberMe" value="true" /> مرا به خاطر بسپار
+                </label>
+            </div>
+
+            @* [جدید] دکمه‌ی ارسال فرم: به‌جای MudButton با OnClick؛ همان کلاس login-btn پس ظاهر یکسان است *@
+            <button type="submit" class="login-btn">ورود به حساب</button>
+
+        </form>
 
     </MudPaper>
 </div>
 
+<style>
+    /* =========================================
+           تنظیمات کلی صفحه و فونت
+           ========================================= */
+    .login-page {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f1f5f9; /* پس‌زمینه روشن و ملایم */
+        padding: 20px;
+        position: relative;
+        font-family: 'BTrafficBold', 'Segoe UI', Tahoma, sans-serif !important;
+    }
+
+        /* اعمال فونت به تمام المان‌های MudBlazor داخل این صفحه */
+        .login-page * {
+            font-family: 'BTrafficBold', 'Segoe UI', Tahoma, sans-serif !important;
+        }
+
+    /* =========================================
+           کارت لاگین (تم روشن)
+           ========================================= */
+    .login-card {
+        width: 100%;
+        max-width: 420px;
+        padding: 48px 40px !important;
+        background: #ffffff !important; /* کارت سفید */
+        border-radius: 24px !important;
+        border: 1px solid #e2e8f0 !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05) !important;
+        animation: slideUp 0.6s ease-out;
+    }
+
+    @@keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* =========================================
+           هدر کارت
+           ========================================= */
+    .login-header {
+        text-align: center;
+        margin-bottom: 32px;
+    }
+
+    .logo-container {
+        width: 64px;
+        height: 64px;
+        background: #eff6ff; /* آبی بسیار روشن */
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 16px auto;
+        border: 1px solid #dbeafe;
+    }
+
+    .login-title {
+        color: #1e293b !important; /* خاکستری تیره */
+        font-weight: 700 !important;
+        margin-bottom: 8px !important;
+        font-size: 2rem !important;
+    }
+
+    .login-subtitle {
+        color: #64748b !important; /* خاکستری متوسط */
+        font-size: 1.1rem !important;
+    }
+
+    /* =========================================
+           استایل‌های فیلدهای ورودی
+           ========================================= */
+    .input-group {
+        margin-bottom: 20px;
+    }
+
+    /* حاشیه فیلدها */
+    .custom-input .mud-input-outlined fieldset {
+        border-color: #cbd5e1 !important;
+        border-radius: 12px !important;
+        transition: all 0.3s ease;
+    }
+
+    /* هاور روی فیلد */
+    .custom-input .mud-input-outlined:hover fieldset {
+        border-color: #94a3b8 !important;
+    }
+
+    /* فوکوس روی فیلد */
+    .custom-input .mud-input-outlined.mud-input-outlined-focused fieldset {
+        border-color: #3b82f6 !important;
+        border-width: 2px !important;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+
+    /* رنگ متن داخل فیلد */
+    .custom-input .mud-input > input,
+    .custom-input .mud-input-slot {
+        color: #1e293b !important;
+        font-size: 1.2rem !important; /* فونت ب نازنین کمی بزرگتر بهتر دیده می‌شود */
+    }
+
+    /* رنگ لیبل‌ها */
+    .custom-input .mud-input-label {
+        right: 12px !important;
+        left: auto !important;
+        transform-origin: 20px !important;
+        text-align: right !important;
+    }
+
+    .custom-input input {
+        direction: ltr !important;
+        text-align: left !important;
+        padding-left: 12px !important;
+    }
+
+    .custom-input {
+        direction: rtl !important;
+        text-align: right !important;
+    }
+
+    /* رنگ آیکون‌ها */
+    .custom-input .mud-input-adornment {
+        color: #94a3b8 !important;
+        transition: color 0.3s ease;
+    }
+
+    .custom-input .mud-input-outlined-focused .mud-input-adornment {
+        color: #3b82f6 !important;
+    }
+
+    /* =========================================
+           استایل دکمه ورود
+           ========================================= */
+    .login-btn {
+        background: #3b82f6 !important; /* آبی مدرن */
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        height: 56px !important;
+        border-radius: 12px !important;
+        text-transform: none !important;
+        font-size: 1.2rem !important;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+        border: none !important;
+        width: 100%;
+        cursor: pointer;
+        margin-top: 1.5rem;
+    }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
+            background: #2563eb !important;
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        /* حالت غیرفعال دکمه */
+        .login-btn:disabled {
+            background: #e2e8f0 !important;
+            color: #94a3b8 !important;
+            box-shadow: none !important;
+            transform: none !important;
+        }
+
+    .mt-4 {
+        margin-top: 1.5rem !important;
+    }
+
+    /* اصلاح جهت آیکون‌ها و متن‌ها در حالت RTL */
+    .custom-input .mud-input-adornment-start {
+        margin-left: 8px;
+        margin-right: 0;
+    }
+
+    .custom-input .mud-input-adornment-end {
+        margin-right: 8px;
+        margin-left: 0;
+    }
+
+    /* =========================================
+           [جدید] استایل فیلدهای input معمولی (جایگزین MudTextField)
+           ظاهر هماهنگ با طراحی قبلی: همان رنگ‌ها، گوشه‌های گرد و فوکوس آبی
+           ========================================= */
+    .field-label {
+        display: block;
+        margin-bottom: 6px;
+        color: #64748b;
+        font-size: 1rem;
+    }
+
+    .field-input {
+        width: 100%;
+        height: 52px;
+        padding: 0 14px;
+        box-sizing: border-box;
+        border: 1px solid #cbd5e1;
+        border-radius: 12px;
+        font-size: 1.2rem;
+        direction: ltr;
+        text-align: left;
+        color: #1e293b;
+        background: #fff;
+        transition: all 0.3s ease;
+    }
+
+        .field-input:hover {
+            border-color: #94a3b8;
+        }
+
+        .field-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            border-width: 2px;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+    /* [جدید] چک‌باکس مرا به خاطر بسپار */
+    .remember {
+        color: #64748b;
+        cursor: pointer;
+    }
+
+    /* [جدید] کادر پیام خطا */
+    .login-error {
+        background: #fef2f2;
+        color: #b91c1c;
+        padding: 10px 14px;
+        border-radius: 12px;
+        margin-bottom: 16px;
+    }
+
+    .password-wrapper {
+        position: relative;
+        width: 100%;
+    }
+
+        .password-wrapper .field-input {
+            padding-left: 48px;
+        }
+
+    .password-toggle {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: transparent;
+        border: none;
+        color: #94a3b8;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 5px;
+        transition: color 0.3s ease;
+    }
+
+        .password-toggle:hover {
+            color: #3b82f6;
+        }
+
+    .field-input {
+        direction: ltr;
+        text-align: left;
+        font-family: 'Segoe UI', Tahoma, sans-serif !important;
+        font-variant-numeric: lining-nums;
+    }
+</style>
 
 @code {
-    private MudForm form;
-    private bool success;
-    private string username = "";
-    private string password = "";
+    // [جدید] مقدار ?error=1 از آدرس خوانده می‌شود تا پیام خطا نمایش داده شود
+    // (کدهای قبلی مثل form، success، TogglePasswordVisibility و HandleLogin حذف شدند چون دیگر لازم نیستند)
+    [SupplyParameterFromQuery] public string? Error { get; set; }
 
-    // کنترل نمایش/مخفی کردن رمز عبور
-    private bool isShowPassword = false;
-    private InputType PasswordInput = InputType.Password;
-    private string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+    private bool ShowPassword = false;
 
     private void TogglePasswordVisibility()
     {
-        if (isShowPassword)
-        {
-            isShowPassword = false;
-            PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
-            PasswordInput = InputType.Password;
-        }
-        else
-        {
-            isShowPassword = true;
-            PasswordInputIcon = Icons.Material.Filled.Visibility;
-            PasswordInput = InputType.Text;
-        }
-    }
-
-    private async Task HandleLogin()
-    {
-        await form.Validate();
-
-        if (success)
-        {
-            // اینجا منطق ورود رو بنویس
-            // مثلاً:
-            // var result = await AuthService.Login(username, password);
-            // if (result.Succeeded) Navigation.NavigateTo("/");
-            
-            Console.WriteLine($"Username: {username} | Password: {password}");
-        }
+        ShowPassword = !ShowPassword;
     }
 }
+
